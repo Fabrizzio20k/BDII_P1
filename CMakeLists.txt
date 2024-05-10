@@ -18,7 +18,9 @@ find_package(Crow CONFIG REQUIRED)
 
 include_directories(include)
 
-add_executable(main src/main.cpp)
+add_executable(main src/main.cpp
+        include/parser.h
+        include/api.h)
 
 if(WIN32)
     target_link_libraries(main PRIVATE Crow::Crow ws2_32 wsock32)
