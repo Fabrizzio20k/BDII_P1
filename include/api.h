@@ -31,7 +31,7 @@ inline Api::Api() {
     ([this](const crow::request& req) {
         auto consulta = crow::json::load(req.body);
         if (!consulta) {
-            return crow::response(400);
+            return crow::response(400, "Bad request");
         }
 
         crow::json::wvalue response;
