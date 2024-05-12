@@ -27,3 +27,6 @@ if(WIN32)
 else()
     target_link_libraries(main PRIVATE Crow::Crow)
 endif()
+
+
+add_executable(avl dataStructures/avlFile/avl.cpp)
