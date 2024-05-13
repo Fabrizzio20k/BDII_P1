@@ -176,6 +176,35 @@ public:
             return "UNKNOWN";
         }
     }
+    string getTable()
+    {
+        return cmd.table;
+    }
+    string getErrorMessage()
+    {
+        return cmd.errorMessage;
+    }
+    string getFileRoute(){
+        return cmd.route;
+    }
+    string getIndexType(){
+        return cmd.indexType;
+    }
+    string getIndexColumn(){
+        return cmd.indexColumn;
+    }
+    string getR1(){
+        return cmd.r1;
+    }
+    string getR2(){
+        return cmd.r2;
+    }
+    string getCondition(){
+        return cmd.condition;
+    }
+    vector<string> getValues(){
+        return cmd.values;
+    }
 
     void printSentence()
     {

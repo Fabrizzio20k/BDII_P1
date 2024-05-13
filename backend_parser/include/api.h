@@ -32,7 +32,7 @@ inline Api::Api() {
 
     CROW_ROUTE(app, "/").methods("GET"_method)
     ([]() {
-        return crow::response(200, "Hello, World!");
+        return crow::response(200, "Hello, Worldd!");
     });
 
     CROW_ROUTE(app, "/api/v1/parser").methods("POST"_method)
@@ -51,6 +51,17 @@ inline Api::Api() {
             response["status"] = "ok";
             response["message"] = "Command parsed successfully";
             response["command"] = parser.getType();
+            response["table"] = parser.getTable();
+            response["condition"] = parser.getCondition();
+            response["route"] = parser.getFileRoute();
+            response["indexType"] = parser.getIndexType();
+            response["indexColumn"] = parser.getIndexColumn();
+            response["r1"] = parser.getR1();
+            response["r2"] = parser.getR2();
+            // return also the values in case of INSERTAR
+            if (parser.getType() == "INSERTAR") {
+                response["values"] = parser.getValues();
+            }
         } else {
             response["status"] = "error";
             response["message"] = parser.getCommand().errorMessage;
