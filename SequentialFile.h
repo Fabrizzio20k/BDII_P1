@@ -73,10 +73,12 @@ class SequentialFile {
     size_t n {};
     size_t k {};
 
+    function<bool(T&, T&)> cmp;
+
     char* filename;
 
 public:
-    SequentialFile(const char* filename, Mode mode, function<bool(Record&, Record&)> cmp) {
+    SequentialFile(const char* filename, Mode mode, function<bool(T&, T&)> cmp) : cmp(cmp) {
         strcpy(this->filename, filename);
 
         fstream f (filename, ios::in | ios::out | ios::binary);
