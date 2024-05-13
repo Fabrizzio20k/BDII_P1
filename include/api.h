@@ -4,6 +4,9 @@
 #include "crow.h"
 #include "crow/middlewares/cors.h"
 #include "parser.h"
+#include <iostream>
+
+using namespace std;
 
 class Api {
     public:
@@ -26,6 +29,11 @@ inline Api::Api() {
             .origin("example.com")
             .prefix("/nocors")
             .ignore();
+
+    CROW_ROUTE(app, "/").methods("GET"_method)
+    ([]() {
+        return crow::response(200, "Hello, World!");
+    });
 
     CROW_ROUTE(app, "/api/v1/parser").methods("POST"_method)
     ([this](const crow::request& req) {
