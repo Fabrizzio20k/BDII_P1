@@ -1,0 +1,22 @@
+[
+    {
+        "tablename": "Table1",
+        "numberofelements": 10
+    },
+    {
+        "tablename": "Table2",
+        "numberofelements": 15
+    },
+    {
+        "tablename": "Table3",
+        "numberofelements": 8
+    },
+    {
+        "tablename": "Table4",
+        "numberofelements": 20
+    },
+    {
+        "tablename": "Table5",
+        "numberofelements": 12
+    }
+]
