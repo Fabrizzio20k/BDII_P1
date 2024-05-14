@@ -25,4 +25,5 @@ else()
 endif()
 
 
-# add_executable(avl dataStructures/avlFile/avl.cpp)
+add_executable(avl dataStructures/avlFile/avlfile.cpp
+    experiments/avlExperiment.cpp)
