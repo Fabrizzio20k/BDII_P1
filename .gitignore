@@ -44,8 +44,6 @@ cmake-build-debug/
 # Vim Swap Files
 *.swp
 
-*.csv
-
 # macOS compilation dirs
 *.dSYM
 .DS_STORE
