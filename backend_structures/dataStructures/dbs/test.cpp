@@ -1,24 +1,42 @@
 #include <iostream>
 #include <fstream>
-#include "facebookRecord.h"
+#include <sstream>
+#include <string>
+#include <vector>
+#include "appleRecord.h"
 
 using namespace std;
 
 int main()
 {
-    ifstream in("SpotifyFeatures.csv");
-    int counter = 0;
-    cout << "Reading file..." << endl;
+    ifstream file("AppleStore.csv");
 
-    cout << "first 10 records:" << endl;
-    facebookRecord record;
-    while (in >> record)
+    if (!file.is_open())
     {
-        if (counter < 10)
-        {
-            cout << record.genre << " " << record.artist_name << " " << record.track_name << " " << record.track_id << " " << record.popularity << " " << record.acousticness << " " << record.danceability << " " << record.duration_ms << " " << record.energy << " " << record.instrumentalness << " " << record.key << " " << record.liveness << " " << record.loudness << " " << record.mode << " " << record.speechiness << " " << record.tempo << " " << record.time_signature << " " << record.valence << endl;
-        }
-        counter++;
+        std::cout << "No se pudo abrir el archivo" << std::endl;
+        return 1;
     }
+
+    vector<appleRecord> records;
+    appleRecord record;
+
+    // skip the first line
+    string line;
+    getline(file, line);
+
+    // read the first 10 records
+    while (file >> record && file.peek() != EOF)
+    {
+        records.push_back(record);
+    }
+
+    cout << "Total records read: " << records.size() << endl;
+
+    for (const auto &r : records)
+    {
+        cout << r.id << " " << r.track_name << " " << r.size_bytes << " " << r.currency << " " << r.price << " " << r.rating_count_tot << " " << r.rating_count_ver << " " << r.user_rating << " " << r.user_rating_ver << " " << r.ver << " " << r.cont_rating << " " << r.prime_genre << " " << r.sup_devices_num << " " << r.ipadSc_urls_num << " " << r.lang_num << " " << r.vpp_lic << endl;
+    }
+
+    file.close();
     return 0;
 }
