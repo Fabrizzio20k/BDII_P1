@@ -3,23 +3,24 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <cstring>
 
 using namespace std;
 
 struct appleRecord
 {
     long long id;
-    string track_name;
+    char track_name[230];
     long long size_bytes;
-    string currency;
+    char currency[3];
     double price;
     long long rating_count_tot;
     long long rating_count_ver;
     double user_rating;
     double user_rating_ver;
-    string ver;
-    string cont_rating;
-    string prime_genre;
+    char ver[15];
+    char cont_rating[3];
+    char prime_genre[20];
     int sup_devices_num;
     int ipadSc_urls_num;
     int lang_num;
@@ -36,12 +37,14 @@ struct appleRecord
         getline(lineStream, cell, ',');
         data.id = stoll(cell);
 
-        getline(lineStream, data.track_name, ',');
+        getline(lineStream, cell, ',');
+        strcpy(data.track_name, cell.c_str());
 
         getline(lineStream, cell, ',');
         data.size_bytes = stoll(cell);
 
-        getline(lineStream, data.currency, ',');
+        getline(lineStream, cell, ',');
+        strcpy(data.currency, cell.c_str());
 
         getline(lineStream, cell, ',');
         data.price = stod(cell);
@@ -58,11 +61,14 @@ struct appleRecord
         getline(lineStream, cell, ',');
         data.user_rating_ver = stod(cell);
 
-        getline(lineStream, data.ver, ',');
+        getline(lineStream, cell, ',');
+        strcpy(data.ver, cell.c_str());
 
-        getline(lineStream, data.cont_rating, ',');
+        getline(lineStream, cell, ',');
+        strcpy(data.cont_rating, cell.c_str());
 
-        getline(lineStream, data.prime_genre, ',');
+        getline(lineStream, cell, ',');
+        strcpy(data.prime_genre, cell.c_str());
 
         getline(lineStream, cell, ',');
         data.sup_devices_num = stoi(cell);

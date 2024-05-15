@@ -34,7 +34,7 @@ int main()
 
     for (const auto &r : records)
     {
-        cout << r.id << " " << r.track_name << " " << r.size_bytes << " " << r.currency << " " << r.price << " " << r.rating_count_tot << " " << r.rating_count_ver << " " << r.user_rating << " " << r.user_rating_ver << " " << r.ver << " " << r.cont_rating << " " << r.prime_genre << " " << r.sup_devices_num << " " << r.ipadSc_urls_num << " " << r.lang_num << " " << r.vpp_lic << endl;
+        cout << r.id << " " << r.prime_genre << endl;
     }
 
     file.close();
