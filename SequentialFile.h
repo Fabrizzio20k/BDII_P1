@@ -11,9 +11,9 @@
 #include <functional>
 using namespace std;
 
-template<typename T>
+template<typename T, typename Key>
 class SequentialFile {
-    enum Mode { insert, search};
+    enum Mode { INSERT, SEARCH};
 
     class Record {
         T data;
@@ -24,8 +24,8 @@ class SequentialFile {
 
     void setK(Mode mode) {
         switch (mode) {
-            case search: K = 64 - __builtin_clzll(blockingFactor); break;
-            case insert:
+            case SEARCH: K = 64 - __builtin_clzll(blockingFactor); break;
+            case INSERT:
                 double x {}, m {static_cast<double>(N)};
                 for (double k1 = m; k1 > 0; k1/=2) {
                     double p = (x + k1) * (x + k1);
@@ -90,6 +90,18 @@ public:
             setK(mode);
             setHeader();
         }
+    }
+    pair<T,bool> search(Key key) {
+
+    }
+    bool insert(T data) {
+
+    }
+    bool remove(Key key) {
+
+    }
+    vector<T> range(Key left, Key right) {
+
     }
 };
 
