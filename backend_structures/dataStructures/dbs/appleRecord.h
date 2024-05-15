@@ -7,9 +7,9 @@
 
 using namespace std;
 
-struct appleRecord
-{
-    long long id;
+template<typename TK>
+struct Record {
+    TK id;
     char track_name[230];
     long long size_bytes;
     char currency[3];
@@ -25,8 +25,11 @@ struct appleRecord
     int ipadSc_urls_num;
     int lang_num;
     int vpp_lic;
+	int left = -1;
+	int right = -1;
+	int height = 0;
 
-    friend istream &operator>>(istream &str, appleRecord &data)
+    friend istream &operator>>(istream &str, Record &data)
     {
         string line;
         getline(str, line);

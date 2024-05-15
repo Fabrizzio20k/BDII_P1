@@ -17,8 +17,8 @@ int main()
         return 1;
     }
 
-    vector<appleRecord> records;
-    appleRecord record;
+    vector<Record> records;
+    Record record;
 
     // skip the first line
     string line;

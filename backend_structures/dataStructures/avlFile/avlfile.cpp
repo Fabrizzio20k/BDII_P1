@@ -3,35 +3,36 @@
 #include <string>
 #include <fstream>
 #include <iomanip>
+#include "appleRecord.h"
 
 using namespace std;
 
-template<typename TK>
-struct Record {
-	TK cod;
-	char nombre[12];
-	int ciclo;
-	long left = -1, right = -1;
-	int height = 0;
-
-	void setData() {
-		cout << "Codigo:";
-		cin >> cod;
-		cout << "Nombre: ";
-		cin >> nombre;
-		cout << "Ciclo: ";
-		cin >> ciclo;
-	}
-
-	void showData() {
-		cout << "\nCodigo: " << cod;
-		cout << "\nNombre: " << nombre;
-		cout << "\nCiclo : " << ciclo << endl;
-		cout << "Izq : " << left << endl;
-		cout << "Der : " << right << endl;
-		cout << "Altura : " << height << endl;
-	}
-};
+//template<typename TK>
+//struct Record {
+//	TK id;
+//	char nombre[12];
+//	int ciclo;
+//	long left = -1, right = -1;
+//	int height = 0;
+//
+//	void setData() {
+//		cout << "Codigo:";
+//		cin >> id;
+//		cout << "Nombre: ";
+//		cin >> nombre;
+//		cout << "Ciclo: ";
+//		cin >> ciclo;
+//	}
+//
+//	void showData() {
+//		cout << "\nCodigo: " << id;
+//		cout << "\nNombre: " << nombre;
+//		cout << "\nCiclo : " << ciclo << endl;
+//		cout << "Izq : " << left << endl;
+//		cout << "Der : " << right << endl;
+//		cout << "Altura : " << height << endl;
+//	}
+//};
 
 template<typename TK>
 class AVLFile {
@@ -115,9 +116,9 @@ public:
 
 		int count = 0;
 		while (file.read((char *) (&record), sizeof(Record<TK>)))
-//			cout << count++ << ": " << record.cod << " | " << record.nombre << " | " << record.ciclo << " | "
+//			cout << count++ << ": " << record.id << " | " << record.nombre << " | " << record.ciclo << " | "
 //				 << record.left << " | " << record.right << " | " << record.height << endl;
-			cout << count++ << ": " << record.cod << " | " << record.left << " | " << record.right << " | " << record.height << endl;
+			cout << count++ << ": " << record.id << " | " << record.left << " | " << record.right << " | " << record.height << endl;
 
 
 		file.close();
@@ -153,9 +154,9 @@ private:
 		file.seekg(sizeof(long) + pos_node * sizeof(Record<TK>), ios::beg);
 		file.read((char *) &record, sizeof(Record<TK>));
 
-		if (key < record.cod)
+		if (key < record.id)
 			search(records, record.left, key, file);
-		else if (record.cod < key)
+		else if (record.id < key)
 			search(records, record.right, key, file);
 		else {
 			records.push_back(record);
@@ -169,13 +170,13 @@ private:
 
 		Record<TK> node = read_record(pos_node, file);
 
-		if(node.cod >= beginKey)
+		if(node.id >= beginKey)
 			rangeSearch(records, node.left, beginKey, endKey, file);
 
-		if(node.cod >= beginKey && node.cod <= endKey)
+		if(node.id >= beginKey && node.id <= endKey)
 			records.push_back(node);
 
-		if(node.cod <= endKey)
+		if(node.id <= endKey)
 			rangeSearch(records, node.right, beginKey, endKey, file);
 	}
 
@@ -190,7 +191,7 @@ private:
 
 		Record<TK> node = read_record(pos_node, file);
 
-		if (record.cod < node.cod) {
+		if (record.id < node.id) {
 			if (node.left == -1) {
 				file.seekg(0, ios::end);
 				long posLeftChildNode = file.tellp() / sizeof(Record<TK>);
@@ -201,7 +202,7 @@ private:
 			} else {
 				insert(pos_node, node.left, record, file);
 			}
-		} else if (record.cod > node.cod) {
+		} else if (record.id > node.id) {
 			if (node.right == -1) {
 				file.seekg(0, ios::end);
 				long posRightChildNode = file.tellp() / sizeof(Record<TK>);
@@ -235,9 +236,9 @@ private:
 
 		Record<TK> node = read_record(pos_node, file);
 
-		if (key < node.cod)
+		if (key < node.id)
 			remove(pos_node, node.left, key, file, res);
-		else if (key > node.cod)
+		else if (key > node.id)
 			remove(pos_node, node.right, key, file, res);
 		else {
 			// Caso 1: Hoja
@@ -321,7 +322,7 @@ private:
 
 			write_record(pos_node, sucesorNode, file);
 
-			remove(pos_node, node.right, sucesorNode.cod, file, res);
+			remove(pos_node, node.right, sucesorNode.id, file, res);
 		}
 
 		balance(pos_parent, pos_node, file);
@@ -363,7 +364,7 @@ private:
 		if (pos_node == -1)
 			return;
 
-		int indent = 4;
+		int indent = 10;
 
 		Record<TK> node = read_record(pos_node, file);
 
@@ -373,7 +374,7 @@ private:
 			cout << setw(level * indent) << " ";
 		}
 
-		cout << node.cod << endl;
+		cout << node.id << endl;
 
 		displayPretty(node.left, level + 1, file);
 	};

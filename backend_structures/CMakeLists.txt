@@ -14,6 +14,7 @@ endif()
 find_package(Crow CONFIG REQUIRED)
 
 include_directories(include dataStructures/avlFile)
+include_directories(include dataStructures/dbs)
 
 add_executable(main src/main.cpp
         include/api.h)
@@ -25,5 +26,6 @@ else()
 endif()
 
 
-add_executable(avl dataStructures/avlFile/avlfile.cpp
-    experiments/avlExperiment.cpp)
+#add_executable(Hash dataStructures/extendibleHashing/extendibleHashing.cpp)
+add_executable(avl
+        experiments/avlExperiment.cpp)
