@@ -39,7 +39,7 @@ class SequentialFile {
     function<Key(T&)> getKey; // function to extract key from data
     function<bool(Key,Key)> cmp; // function to compare two keys: -1 ~= < | 0 ~= == | 1 ~= >
 
-    char* filename;
+    char filename[50];
 
     class Block {
         Record records[SequentialFile::blockingFactor] {};
@@ -86,8 +86,8 @@ class SequentialFile {
 
     void updateHeader() {
         fstream f (filename, ios::in | ios::out | ios::binary);
-        f.write(reinterpret_cast<char*>(&K), sizeof(int));
         f.write(reinterpret_cast<char*>(&n), sizeof(int));
+        f.write(reinterpret_cast<char*>(&K), sizeof(int));
         f.write(reinterpret_cast<char*>(&k), sizeof(int));
         f.write(reinterpret_cast<char*>(&delCnt), sizeof(int));
         f.write(reinterpret_cast<char*>(&start), sizeof(Record) - 4 * sizeof(int));
@@ -266,15 +266,15 @@ public:
 
     pair<T,bool> search(Key key) {
         auto [record, pos] = _search(key);
-        if (cmp(getKey(record.data), key) == 0) return {record, true};
+        if (cmp(getKey(record.data), key) == 0) return {record.data, true};
 
         pos = n + 1;
         while (pos <= n + k) {
             record = getRecord(pos++);
             if (record.next == -1) continue;
-            if (cmp(getKey(record), key) == 0) return {record, true};
+            if (cmp(getKey(record.data), key) == 0) return {record.data, true};
         }
-        return {Record{}, false};
+        return {T{}, false};
     }
 
     bool insert(T data) {
