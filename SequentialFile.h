@@ -17,23 +17,23 @@ class SequentialFile {
 
     class Record {
         T data;
-        size_t next {0};
+        int next {0};
         friend SequentialFile;
     public:
         Record(T& data) : data(data) {}
     };
 
-    static const size_t blockSize = (1<<12); // block size in bytes
-    static const size_t blockingFactor = blockSize / sizeof(Record);
+    static const int blockSize = (1<<12); // block size in bytes
+    static const int blockingFactor = blockSize / sizeof(Record);
 
-    size_t N {blockingFactor}; // number of records in first block to manage in memory
+    int N {blockingFactor}; // number of records in first block to manage in memory
     Mode mode {SEARCH};
 
-    size_t n {}; // number of records in main space
-    size_t K {}; // maximum number of records in auxiliary space
-    size_t k {}; // current number of records in auxiliary space
-    size_t delCnt {}; // number of removed records
-    size_t start {}; // position of first element (ordered)
+    int n {}; // number of records in main space
+    int K {}; // maximum number of records in auxiliary space
+    int k {}; // current number of records in auxiliary space
+    int delCnt {}; // number of removed records
+    int start {}; // position of first element (ordered)
 
     function<Key(T&)> getKey;
 
@@ -58,37 +58,37 @@ class SequentialFile {
                         p = (x + k1) * (x + k1);
                     }
                 }
-                K = static_cast<size_t>(x);
+                K = static_cast<int>(x);
         }
     }
 
     void setHeader() {
         ofstream f (filename, ios::binary);
-        f.write(reinterpret_cast<char*>(&n), sizeof(size_t));
-        f.write(reinterpret_cast<char*>(&K), sizeof(size_t));
-        f.write(reinterpret_cast<char*>(&k), sizeof(size_t));
-        f.write(reinterpret_cast<char*>(&delCnt), sizeof(size_t));
-        f.write(reinterpret_cast<char*>(&start), sizeof(Record) - 4 * sizeof(size_t));
+        f.write(reinterpret_cast<char*>(&n), sizeof(int));
+        f.write(reinterpret_cast<char*>(&K), sizeof(int));
+        f.write(reinterpret_cast<char*>(&k), sizeof(int));
+        f.write(reinterpret_cast<char*>(&delCnt), sizeof(int));
+        f.write(reinterpret_cast<char*>(&start), sizeof(Record) - 4 * sizeof(int));
         f.close();
     }
 
     void processHeader() {
         ifstream f (filename, ios::binary);
-        f.read(reinterpret_cast<char*>(&n), sizeof(size_t));
-        f.read(reinterpret_cast<char*>(&K), sizeof(size_t));
-        f.read(reinterpret_cast<char*>(&k), sizeof(size_t));
-        f.read(reinterpret_cast<char*>(&delCnt), sizeof(size_t));
-        f.read(reinterpret_cast<char*>(&start), sizeof(size_t));
+        f.read(reinterpret_cast<char*>(&n), sizeof(int));
+        f.read(reinterpret_cast<char*>(&K), sizeof(int));
+        f.read(reinterpret_cast<char*>(&k), sizeof(int));
+        f.read(reinterpret_cast<char*>(&delCnt), sizeof(int));
+        f.read(reinterpret_cast<char*>(&start), sizeof(int));
         f.close();
     }
 
     void updateHeader() {
         fstream f (filename, ios::in | ios::out | ios::binary);
-        f.write(reinterpret_cast<char*>(&K), sizeof(size_t));
-        f.write(reinterpret_cast<char*>(&n), sizeof(size_t));
-        f.write(reinterpret_cast<char*>(&k), sizeof(size_t));
-        f.write(reinterpret_cast<char*>(&delCnt), sizeof(size_t));
-        f.write(reinterpret_cast<char*>(&start), sizeof(Record) - 4 * sizeof(size_t));
+        f.write(reinterpret_cast<char*>(&K), sizeof(int));
+        f.write(reinterpret_cast<char*>(&n), sizeof(int));
+        f.write(reinterpret_cast<char*>(&k), sizeof(int));
+        f.write(reinterpret_cast<char*>(&delCnt), sizeof(int));
+        f.write(reinterpret_cast<char*>(&start), sizeof(Record) - 4 * sizeof(int));
         f.close();
     }
 
@@ -103,7 +103,7 @@ class SequentialFile {
         return block;
     }
 
-    void writeFirstBlock(Block& block) {
+    void setFirstBlock(Block& block) {
         fstream f (filename, ios::in | ios::out | ios::binary);
         f.seekp(sizeof(Record));
 
@@ -112,7 +112,7 @@ class SequentialFile {
         f.close();
     }
 
-    Record getRecord(size_t pos) {
+    Record getRecord(int pos) {
         ifstream f (filename, ios::binary);
         f.seekg(pos * sizeof(Record));
 
@@ -123,17 +123,17 @@ class SequentialFile {
         return record;
     }
 
-    void setRecord(Record& record, size_t pos) {
+    void setRecord(Record& record, int pos) {
         fstream f (filename, ios::in | ios::out | ios::binary);
         f.seekp(pos * sizeof(Record));
         f.write(reinterpret_cast<char*>(&record), sizeof(Record));
         f.close();
     }
 
-    pair<Record,size_t> _search(Key key) {
-        size_t pos {0};
+    pair<Record,int> _search(Key key) {
+        int pos {0};
         Record record {};
-        for (size_t x = n - 1; x > 0; x >>= 1) {
+        for (int x = n - 1; x > 0; x >>= 1) {
             while (pos + x <= n) {
                 record = getRecord(pos + x);
                 if (getKey(record.data) <= key) pos += x;
@@ -160,7 +160,7 @@ class SequentialFile {
             block.records[i - 1].next = i + 1;
 
         updateHeader();
-        writeFirstBlock(block);
+        setFirstBlock(block);
 
         return true;
     }
@@ -190,7 +190,7 @@ class SequentialFile {
         }
         else if (getKey(match.data) == key) return false;
         else {
-            size_t nextPos = match.next;
+            int nextPos = match.next;
             Record next {};
             while (nextPos) {
                 next = getRecord(nextPos);
@@ -215,7 +215,7 @@ class SequentialFile {
     }
 
     void rebuild() {
-        size_t it {start}, ind {};
+        int it {start}, ind {};
         Record records [n + k - delCnt];
         while (it) {
             records[ind] = getRecord(it);
@@ -248,7 +248,7 @@ public:
             setK(mode);
             setHeader();
             Block block {};
-            writeFirstBlock(block);
+            setFirstBlock(block);
         }
     }
 
@@ -258,9 +258,9 @@ public:
 
         pos = n + 1;
         while (pos <= n + k) {
-            record = getRecord(pos);
+            record = getRecord(pos++);
+            if (record.next == -1) continue;
             if (getKey(record) == key) return {record, true};
-            ++pos;
         }
         return {Record{}, false};
     }
@@ -273,9 +273,57 @@ public:
     }
 
     bool remove(Key key) {
+        if (n == 0) return false;
         if (delCnt == K) rebuild();
-        auto [data, found] = search(key);
 
+        int pos {0};
+        Record record {};
+        for (int x = n - 1; x > 0; x >>= 1) {
+            while (pos + x <= n) {
+                record = getRecord(pos + x);
+                if (getKey(record.data) < key) pos += x;
+                else break;
+            }
+        }
+        while (pos && record.next == -1) record = getRecord(--pos);
+
+        if (pos == 0) {
+            pos = start;
+            record = getRecord(pos);
+        }
+
+        Record next {};
+        while (record.next) {
+            next = getRecord(record.next);
+            if (getKey(next.data) >= key) break;
+
+            pos = record.next;
+            record = next;
+        }
+        if (record.next) {
+            if (getKey(next) != key) return false;
+
+            int nextPos = record.next;
+
+            record.next = next.next;
+            next.next = -1;
+            setRecord(record, pos);
+            setRecord(next, nextPos);
+
+            ++delCnt;
+            updateHeader();
+            return true;
+        }
+        else if (getKey(record) == key) {
+            start = record.next;
+            record.next = -1;
+            setRecord(record, pos);
+
+            ++delCnt;
+            updateHeader();
+            return true;
+        }
+        else return false;
     }
 
     vector<T> range(Key left, Key right) {
