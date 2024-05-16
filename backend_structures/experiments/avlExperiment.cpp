@@ -11,7 +11,12 @@ using namespace std::chrono;
 #define ll long long
 
 void loadAppleData(AVLFile<ll> &avlfile){
-	ifstream file(R"(C:\Users\jeffr\GitHub\BDII_P1\backend_structures\dataStructures\dbs\AppleStore.csv)");
+	string path = __FILE__;
+	path = path.substr(0, path.find_last_of("\\/"));
+	path = path.substr(0, path.find_last_of("\\/"));
+	path = path + "/dataStructures/dbs/AppleStore.csv";
+
+	ifstream file(path);
 
 	avlfile.clear();
 
@@ -27,8 +32,8 @@ void loadAppleData(AVLFile<ll> &avlfile){
 	int i = 0;
 	while (file >> record && file.peek() != EOF){
 		avlfile.insert(record);
-		i++;
-	}
+ 		i++;
+ 	}
 
 	cout << "Total records read: " << i << endl;
 
@@ -114,8 +119,23 @@ void loadAppleData(AVLFile<ll> &avlfile){
 int main(){
 	AVLFile<ll> avlfile("data.dat");
 
-//	loadAppleData(avlfile);
+	loadAppleData(avlfile);
 
-	avlfile.printAll();
+	// avlfile.printAll();
+
+	Record<ll> r ={ 99, "YAPE FAKE APK", 1000000, "USD", 0.0, 0, 0, 0.0, 0.0, "1.0", "4+", "Finance", 38, 5, 1, 1, -1, -1, 0};
+
+	avlfile.insert(r);
+	//avlfile.remove(124324423000);
+	auto v1 = avlfile.rangeSearch(300000000, 429047995);
+	auto v2 = avlfile.search(99);
+
+	cout << "Size v1: " << v1.size() << endl;
+	cout << "Size v2: " << v2.size() << endl;
+
+	for (auto&i : v2) {
+		cout << i.id;
+	}
+
 	return 0;
 }
