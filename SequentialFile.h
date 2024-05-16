@@ -16,11 +16,12 @@ class SequentialFile {
     enum Mode { INSERT, SEARCH};
 
     class Record {
-        T data;
+        T data {};
         int next {0};
         friend SequentialFile;
     public:
-        Record(T& data) : data(data) {}
+        Record() = default;
+        explicit Record(T& data) : data(data) {}
     };
 
     static const int blockSize = (1<<12); // block size in bytes
@@ -35,12 +36,13 @@ class SequentialFile {
     int delCnt {}; // number of removed records
     int start {}; // position of first element (ordered)
 
-    function<Key(T&)> getKey;
+    function<Key(T&)> getKey; // function to extract key from data
+    function<bool(Key,Key)> cmp; // function to compare two keys: -1 ~= < | 0 ~= == | 1 ~= >
 
     char* filename;
 
     class Block {
-        Record records[SequentialFile::blockingFactor];
+        Record records[SequentialFile::blockingFactor] {};
         friend SequentialFile;
     public:
         Block() = default;
@@ -51,7 +53,7 @@ class SequentialFile {
             case SEARCH: K = 64 - __builtin_clzll(blockingFactor); break;
             case INSERT:
                 double x {}, m {static_cast<double>(N)};
-                for (double k1 = m; k1 > 0; k1/=2) {
+                for (double k1 = m; k1 > 0; k1 /= 2) {
                     double p = (x + k1) * (x + k1);
                     while (p < m && m - p < 1e-9) {
                         x+=k1;
@@ -136,7 +138,7 @@ class SequentialFile {
         for (int x = n - 1; x > 0; x >>= 1) {
             while (pos + x <= n) {
                 record = getRecord(pos + x);
-                if (getKey(record.data) <= key) pos += x;
+                if (cmp(getKey(record.data), key) < 1) pos += x;
                 else break;
             }
         }
@@ -148,14 +150,21 @@ class SequentialFile {
         Key key = getKey(record.data);
 
         Block block = getFirstBlock();
-        auto cmp = [&](Record& r1, Record& r2)->bool {
-            return getKey(r1.data) < getKey(r2.data);
+        auto recordCmp = [&](Record& r1, Record& r2)->bool {
+            return cmp(getKey(r1.data), getKey(r2.data)) == 0;
         };
-        Record match = lower_bound(block.records, block.records + n, record, cmp);
-        if (getKey(match.data) == key) return false;
+
+        int pos {1};
+        for (int x = n - 1; x > 0; x >>= 1)
+            while (pos + x <= n) {
+                Record match = getRecord(pos + x);
+                if (cmp(getKey(match.data), key) == 0) return false;
+                if (cmp(getKey(match.data), key) == 1) break;
+                pos += x;
+            }
 
         block.records[n++] = record;
-        sort(block.records, block.records + n, cmp);
+        sort(block.records, block.records + n, recordCmp);
         for (int i = 1; i < n; ++i)
             block.records[i - 1].next = i + 1;
 
@@ -172,13 +181,13 @@ class SequentialFile {
         if (pos == 0) {
             pos = start;
             match = getRecord(pos);
-            while (getKey(match.data) <= key) {
+            while (cmp(getKey(match.data), key) < 1) {
                 pos = match.next;
                 match = getRecord(pos);
             }
 
-            if (getKey(match.data) == key) return false;
-            if (getKey(match.data) > key) {
+            if (cmp(getKey(match.data), key) == 0) return false;
+            if (cmp(getKey(match.data), key) == 1) {
                 record.next = start;
                 start = n + k + 1;
             }
@@ -188,20 +197,20 @@ class SequentialFile {
                 setRecord(match, pos);
             }
         }
-        else if (getKey(match.data) == key) return false;
+        else if (cmp(getKey(match.data), key) == 0) return false;
         else {
             int nextPos = match.next;
             Record next {};
             while (nextPos) {
                 next = getRecord(nextPos);
-                if (getKey(next) > key) break;
+                if (cmp(getKey(next.data), key) == 1) break;
 
                 match = next;
                 pos = nextPos;
                 nextPos = match.next;
             }
 
-            if (getKey(match.data) == key) return false;
+            if (cmp(getKey(match.data), key) == 0) return false;
 
             match.next = n + k + 1;
             record.next = nextPos;
@@ -236,8 +245,10 @@ class SequentialFile {
     }
 
 public:
-    SequentialFile(const char* filename, Mode mode, function<Key(T&)> getKey) : mode(mode), getKey(getKey) {
+    SequentialFile(const char* filename, function<Key(T&)> getKey, function<bool(Key,Key)> cmp, bool searchMode=true) : getKey(getKey), cmp(cmp) {
         strcpy(this->filename, filename);
+
+        if (!searchMode) mode = INSERT;
 
         fstream f (filename, ios::in | ios::out | ios::binary);
         bool exists = f.is_open();
@@ -245,22 +256,23 @@ public:
 
         if (exists) processHeader();
         else {
-            setK(mode);
+            setK();
             setHeader();
             Block block {};
             setFirstBlock(block);
         }
     }
+    ~SequentialFile() = default;
 
     pair<T,bool> search(Key key) {
         auto [record, pos] = _search(key);
-        if (getKey(record.data) == key) return {record, true};
+        if (cmp(getKey(record.data), key) == 0) return {record, true};
 
         pos = n + 1;
         while (pos <= n + k) {
             record = getRecord(pos++);
             if (record.next == -1) continue;
-            if (getKey(record) == key) return {record, true};
+            if (cmp(getKey(record), key) == 0) return {record, true};
         }
         return {Record{}, false};
     }
@@ -281,7 +293,7 @@ public:
         for (int x = n - 1; x > 0; x >>= 1) {
             while (pos + x <= n) {
                 record = getRecord(pos + x);
-                if (getKey(record.data) < key) pos += x;
+                if (cmp(getKey(record.data), key) == -1) pos += x;
                 else break;
             }
         }
@@ -295,7 +307,7 @@ public:
         Record next {};
         while (record.next) {
             next = getRecord(record.next);
-            if (getKey(next.data) >= key) break;
+            if (cmp(getKey(next.data), key) >= 0) break;
 
             pos = record.next;
             record = next;
@@ -314,7 +326,7 @@ public:
             updateHeader();
             return true;
         }
-        else if (getKey(record) == key) {
+        else if (cmp(getKey(record), key) == 0) {
             start = record.next;
             record.next = -1;
             setRecord(record, pos);
@@ -327,7 +339,7 @@ public:
     }
 
     vector<T> range(Key left, Key right) {
-
+        return vector<T>{};
     }
 };
 
