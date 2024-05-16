@@ -12,7 +12,7 @@ struct Record {
     TK id;
     char track_name[230];
     long long size_bytes;
-    char currency[3];
+    char currency[4];
     double price;
     long long rating_count_tot;
     long long rating_count_ver;
