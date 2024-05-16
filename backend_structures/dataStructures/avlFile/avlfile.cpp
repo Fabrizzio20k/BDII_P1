@@ -6,7 +6,7 @@
 #include "appleRecord.h"
 
 using namespace std;
-
+//
 //template<typename TK>
 //struct Record {
 //	TK id;
@@ -364,7 +364,7 @@ private:
 		if (pos_node == -1)
 			return;
 
-		int indent = 10;
+		int indent = 5;
 
 		Record<TK> node = read_record(pos_node, file);
 
@@ -397,8 +397,9 @@ private:
 		write_record(pos_node, node, file);
 	}
 
-	int left_rotate(long pos_node, fstream &file) {
+	void left_rotate(long parent, long pos_node, fstream &file) {
 		Record<TK> node = read_record(pos_node, file);
+		int newPos;
 
 		if (balancingFactor(node.left, file) >= 0) {
 			int posLeft = node.left;
@@ -414,7 +415,7 @@ private:
 			leftNode.height = max(height(leftNode.left, file), height(leftNode.right, file)) + 1;
 			write_record(posLeft, leftNode, file);
 
-			return posLeft;
+			newPos = posLeft;
 		} else {
 			int posLeft = node.left;
 
@@ -438,12 +439,28 @@ private:
 			rightNode.height = max(height(rightNode.left, file), height(rightNode.right, file)) + 1;
 			write_record(posRight, rightNode, file);
 
-			return posRight;
+			newPos = posRight;
+		}
+
+		if (parent == -1) {
+			pos_root = newPos;
+			file.seekp(0, ios::beg);
+			file.write((char *) (&pos_root), sizeof(long));
+		} else {
+			Record<TK> newParent = read_record(parent, file);
+
+			if (newParent.left == pos_node)
+				newParent.left = newPos;
+			else
+				newParent.right = newPos;
+
+			write_record(parent, newParent, file);
 		}
 	}
 
-	int right_rotate(long pos_node, fstream &file) {
+	void right_rotate(long parent, long pos_node, fstream &file) {
 		Record<TK> node = read_record(pos_node, file);
+		int newPos;
 
 		if (balancingFactor(node.right, file) <= 0) {
 			int posRight = node.right;
@@ -459,7 +476,7 @@ private:
 			rightNode.height = max(height(rightNode.left, file), height(rightNode.right, file)) + 1;
 			write_record(posRight, rightNode, file);
 
-			return posRight;
+			newPos = posRight;
 		} else {
 			int posRight = node.right;
 
@@ -483,7 +500,22 @@ private:
 			leftNode.height = max(height(leftNode.left, file), height(leftNode.right, file)) + 1;
 			write_record(posLeft, leftNode, file);
 
-			return posLeft;
+			newPos = posLeft;
+		}
+
+		if (parent == -1) {
+			pos_root = newPos;
+			file.seekp(0, ios::beg);
+			file.write((char *) (&pos_root), sizeof(long));
+		} else {
+			Record<TK> newParent = read_record(parent, file);
+
+			if (newParent.left == pos_node)
+				newParent.left = newPos;
+			else
+				newParent.right = newPos;
+
+			write_record(parent, newParent, file);
 		}
 	}
 
@@ -491,26 +523,13 @@ private:
 		if (pos_node == -1) return;
 
 		int h = balancingFactor(pos_node, file);
-		int l = -1, r = -1;
+//		int l = -1, r = -1;
 
 		if (h > 1)
-			l = left_rotate(pos_node, file);
+			left_rotate(parent, pos_node, file);
 		else if (h < -1)
-			r = right_rotate(pos_node, file);
+			right_rotate(parent, pos_node, file);
 		else
 			updateHeight(pos_node, file);
-
-		if (parent == -1 && (l != -1 || r != -1)) {
-			pos_root = (l == -1) ? r : l;
-			file.seekp(0, ios::beg);
-			file.write((char *) (&pos_root), sizeof(long));
-		} else if (parent != -1 && (l != -1 || r != -1)) {
-			Record<TK> node = read_record(parent, file);
-
-			if (r != -1) node.right = r;
-			else node.left = l;
-
-			write_record(parent, node, file);
-		}
 	}
 };

@@ -19,46 +19,40 @@ void loadAppleData(AVLFile<ll> &avlfile){
 		cerr << "No se pudo abrir el archivo" << endl;
 	}
 
-	vector<Record<ll>> records;
 	Record<ll> record;
 
 	string line;
 	getline(file, line);
 
 	int i = 0;
-	while (file >> record && i < 6){
+	while (file >> record && file.peek() != EOF){
 		avlfile.insert(record);
 		i++;
 	}
 
-//	while (file >> record && file.peek() != EOF){
-////		records.push_back(record);
-//		avlfile.insert(record);
-//	}
-
-//	cout << "Total records read: " << records.size() << endl;
+	cout << "Total records read: " << i << endl;
 
 //	for (const auto &r : records){
 //		cout << r.id << " " << r.prime_genre << endl;
 //	}
-
+//
 	file.close();
 }
 
-//void fulfill(AVLFile<int> &file, ll dataSize) {
+//void fulfill(AVLFile<ll> &file, ll beg, ll dataSize) {
 //	file.clear();
 //
-////	for (int i = 0; i < dataSize; i++) {
-////		Record<int> r;
-////
-////		string name = "Name" + to_string(i);
-////
-////		r.cod = i;
-////		strncpy(r.nombre, name.c_str(), 12);
-////		r.ciclo = i % 10;
-////
-////		file.insert(r);
-////	}
+//	for (ll i = beg; i < dataSize; i++) {
+//		Record<ll> r;
+//
+//		string name = "Name" + to_string(i);
+//
+//		r.id = i;
+//		strncpy(r.nombre, name.c_str(), 12);
+//		r.ciclo = 1;
+//
+//		file.insert(r);
+//	}
 //}
 
 //void testSingleSearch(AVLFile<int> &avlfile, int key) {
@@ -120,7 +114,7 @@ void loadAppleData(AVLFile<ll> &avlfile){
 int main(){
 	AVLFile<ll> avlfile("data.dat");
 
-	loadAppleData(avlfile);
+//	loadAppleData(avlfile);
 
 	avlfile.printAll();
 	return 0;
