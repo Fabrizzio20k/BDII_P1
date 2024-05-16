@@ -13,14 +13,14 @@ struct Record {
     TK id;
     char track_name[230]{};
     long long size_bytes{};
-    char currency[4]{};
+    char currency[5]{};
     double price{};
     long long rating_count_tot{};
     long long rating_count_ver{};
     double user_rating{};
     double user_rating_ver{};
     char ver[15]{};
-    char cont_rating[3]{};
+    char cont_rating[5]{};
     char prime_genre[20]{};
     int sup_devices_num{};
     int ipadSc_urls_num{};

@@ -7,6 +7,8 @@
 #include <iostream>
 #include "avlfile.cpp"
 #include "appleRecord.h"
+#include <cstring>
+#include <string>
 
 using namespace std;
 
@@ -38,7 +40,7 @@ inline Api::Api() {
     cors
             .global()
             .headers("X-Custom-Header", "Upgrade-Insecure-Requests")
-            .methods("POST"_method, "GET"_method)
+            .methods("POST"_method, "GET"_method, "DELETE"_method)
             .prefix("/cors")
             .origin("example.com")
             .prefix("/nocors")
@@ -247,17 +249,88 @@ inline Api::Api() {
         if (!data) {
             return crow::response(400, "Bad request");
         }
+        if(!data.has("record")) {
+            return crow::response(400, "Record not provided");
+        }
+
+        if (!isCreated) {
+            return crow::response(400, "Table not created");
+        }
+
+        Record<ll> record;
+
+        record.id = data["record"]["id"].u();
+
+        string track_name = data["record"]["track_name"].s();
+        strncpy(record.track_name, track_name.c_str(), track_name.size());
+
+        record.size_bytes = data["record"]["size_bytes"].u();
+
+        string currency = data["record"]["currency"].s();
+        strncpy(record.currency, currency.c_str(), currency.size());
+
+        record.price = data["record"]["price"].d();
+        record.rating_count_tot = data["record"]["rating_count_tot"].u();
+        record.rating_count_ver = data["record"]["rating_count_ver"].u();
+        record.user_rating = data["record"]["user_rating"].d();
+        record.user_rating_ver = data["record"]["user_rating_ver"].d();
+
+        string ver = data["record"]["ver"].s();
+        strncpy(record.ver, ver.c_str(), ver.size());
+
+        string cont_rating = data["record"]["cont_rating"].s();
+        strncpy(record.cont_rating, cont_rating.c_str(), cont_rating.size());
+
+        string prime_genre = data["record"]["prime_genre"].s();
+        strncpy(record.prime_genre, prime_genre.c_str(), prime_genre.size());
+
+        record.sup_devices_num = data["record"]["sup_devices_num"].i();
+        record.ipadSc_urls_num = data["record"]["ipadSc_urls_num"].i();
+        record.lang_num = data["record"]["lang_num"].i();
+        record.vpp_lic = data["record"]["vpp_lic"].i();
+
+        if (indexType == "ISAM") {
+            //insert ISAM
+        }
+        else if (indexType == "HASH") {
+            //insert HASH
+        }
+        else {
+            avlfile.insert(record);
+        }
 
         crow::json::wvalue response;
         response["status"] = "success";
         response["message"] = "Record inserted successfully";
+        response["id"] = avlfile.search(record.id)[0].id;
         return crow::response(response);
     });
-    CROW_ROUTE(app, "/api/v1/delete").methods("POST"_method)
+
+    CROW_ROUTE(app, "/api/v1/delete").methods("DELETE"_method)
     ([this](const crow::request &req) {
         auto data = crow::json::load(req.body);
         if (!data) {
             return crow::response(400, "Bad request");
+        }
+        if(!data.has("id")) {
+            return crow::response(400, "id not provided");
+        }
+
+        if (!isCreated) {
+            return crow::response(400, "Table not created");
+        }
+
+        if (indexType == "ISAM") {
+            //delete ISAM
+        }
+        else if (indexType == "HASH") {
+            //delete HASH
+        }
+        else {
+            bool res = avlfile.remove(data["id"].u());
+            if (!res) {
+                return crow::response(404, "Record not found");
+            }
         }
 
         crow::json::wvalue response;
