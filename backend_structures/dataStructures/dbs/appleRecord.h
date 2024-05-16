@@ -1,7 +1,8 @@
+#ifndef APPLE_RECORD_H
+#define APPLE_RECORD_H
+
 #include <iostream>
-#include <fstream>
 #include <string>
-#include <vector>
 #include <sstream>
 #include <cstring>
 
@@ -10,21 +11,21 @@ using namespace std;
 template<typename TK>
 struct Record {
     TK id;
-    char track_name[230];
-    long long size_bytes;
-    char currency[4];
-    double price;
-    long long rating_count_tot;
-    long long rating_count_ver;
-    double user_rating;
-    double user_rating_ver;
-    char ver[15];
-    char cont_rating[3];
-    char prime_genre[20];
-    int sup_devices_num;
-    int ipadSc_urls_num;
-    int lang_num;
-    int vpp_lic;
+    char track_name[230]{};
+    long long size_bytes{};
+    char currency[4]{};
+    double price{};
+    long long rating_count_tot{};
+    long long rating_count_ver{};
+    double user_rating{};
+    double user_rating_ver{};
+    char ver[15]{};
+    char cont_rating[3]{};
+    char prime_genre[20]{};
+    int sup_devices_num{};
+    int ipadSc_urls_num{};
+    int lang_num{};
+    int vpp_lic{};
 	int left = -1;
 	int right = -1;
 	int height = 0;
@@ -107,3 +108,5 @@ struct Record {
         cout << "Vpp Lic: " << vpp_lic << endl;
     }
 };
+
+#endif //APPLE_RECORD_H

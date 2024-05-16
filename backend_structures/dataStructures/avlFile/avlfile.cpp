@@ -1,3 +1,6 @@
+#ifndef AVLFILE_CPP
+#define AVLFILE_CPP
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -533,3 +536,5 @@ private:
 			updateHeight(pos_node, file);
 	}
 };
+
+#endif
