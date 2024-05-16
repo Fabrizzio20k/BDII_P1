@@ -144,8 +144,74 @@ class SequentialFile {
         return {record, pos};
     }
 
-    void insertFirstBlock() {
+    bool mainSpaceInsert(Record record) {
+        Key key = getKey(record.data);
 
+        Block block = getFirstBlock();
+        auto cmp = [&](Record& r1, Record& r2)->bool {
+            return getKey(r1.data) < getKey(r2.data);
+        };
+        Record match = lower_bound(block.records, block.records + n, record, cmp);
+        if (getKey(match.data) == key) return false;
+
+        block.records[n++] = record;
+        sort(block.records, block.records + n, cmp);
+        for (int i = 1; i < n; ++i)
+            block.records[i - 1].next = i + 1;
+
+        updateHeader();
+        writeFirstBlock(block);
+
+        return true;
+    }
+
+    bool auxiliarySpaceInsert(Record record) {
+        Key key = getKey(record.data);
+        auto [match, pos] = _search(key);
+
+        if (pos == 0) {
+            pos = start;
+            match = getRecord(pos);
+            while (getKey(match.data) <= key) {
+                pos = match.next;
+                match = getRecord(pos);
+            }
+
+            if (getKey(match.data) == key) return false;
+            if (getKey(match.data) > key) {
+                record.next = start;
+                start = n + k + 1;
+            }
+            else {
+                record.next = match.next;
+                match.next = n + k + 1;
+                setRecord(match, pos);
+            }
+        }
+        else if (getKey(match.data) == key) return false;
+        else {
+            size_t nextPos = match.next;
+            Record next {};
+            while (nextPos) {
+                next = getRecord(nextPos);
+                if (getKey(next) > key) break;
+
+                match = next;
+                pos = nextPos;
+                nextPos = match.next;
+            }
+
+            if (getKey(match.data) == key) return false;
+
+            match.next = n + k + 1;
+            record.next = nextPos;
+            setRecord(match, pos);
+        }
+
+        updateHeader();
+        setRecord(record, ++k + n);
+
+        return true;
     }
 
     void rebuild() {
@@ -201,76 +267,14 @@ public:
 
     bool insert(T data) {
         Record record = Record(data);
-        Key key = getKey(data);
-        if (n < N) {
-            Block block = getFirstBlock();
-            auto cmp = [&](Record& r1, Record& r2)->bool {
-                return getKey(r1.data) < getKey(r2.data);
-            };
-            Record match = lower_bound(block.records, block.records + n, record, cmp);
-            if (getKey(match.data) == key) return false;
-
-            block.records[n++] = record;
-            sort(block.records, block.records + n, cmp);
-            for (int i = 1; i < n; ++i)
-                block.records[i - 1].next = i + 1;
-
-            updateHeader();
-            writeFirstBlock(block);
-        }
-        else if (k < K) {
-            auto [match, pos] = _search(key);
-
-            if (pos == 0) {
-                pos = start;
-                match = getRecord(pos);
-                while (getKey(match.data) <= key) {
-                    pos = match.next;
-                    match = getRecord(pos);
-                }
-
-                if (getKey(match.data) == key) return false;
-                if (getKey(match.data) > key) {
-                    record.next = start;
-                    start = n + k + 1;
-                }
-                else {
-                    record.next = match.next;
-                    match.next = n + k + 1;
-                    setRecord(match, pos);
-                }
-            }
-            else if (getKey(match.data) == key) return false;
-            else {
-                size_t nextPos = match.next;
-                Record next {};
-                while (nextPos) {
-                    next = getRecord(nextPos);
-                    if (getKey(next) > key) break;
-
-                    match = next;
-                    pos = nextPos;
-                    nextPos = match.next;
-                }
-
-                if (getKey(match.data) == key) return false;
-
-                match.next = n + k + 1;
-                record.next = nextPos;
-                setRecord(match, pos);
-            }
-
-            updateHeader();
-            setRecord(record, ++k + n);
-        }
-        else {
-            rebuild();
-        }
-
-        return true;
+        if (n < N) return mainSpaceInsert(record);
+        if (k == K) rebuild();
+        return auxiliarySpaceInsert(record);
     }
 
     bool remove(Key key) {
+        if (delCnt == K) rebuild();
+        auto [data, found] = search(key);
 
     }
 
