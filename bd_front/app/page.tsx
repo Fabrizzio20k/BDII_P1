@@ -229,7 +229,19 @@ export default function Home() {
   }, [sent]);
 
   return (
-    <main className="bg-gray-900 relative">
+    <main className="relative">
+      <div className="fixed top-0 left-0 w-full h-full -z-10 opacity-25">
+        <video width="100%" height="100%" autoPlay loop muted className="object-cover h-full">
+          <source src="/background.mp4" type="video/mp4" />
+          <track
+            src="/path/to/captions.vtt"
+            kind="subtitles"
+            srcLang="en"
+            label="English"
+          />
+          Your browser does not support the video tag.
+        </video>
+      </div>
       {loading &&
         (<div className="fixed top-0 left-0 w-full h-full bg-black opacity-75 z-10">
           <div className="fixed top-1/2 left-1/2 border-gray-300 h-20 w-20 animate-spin rounded-full border-8 border-t-blue-500" />
