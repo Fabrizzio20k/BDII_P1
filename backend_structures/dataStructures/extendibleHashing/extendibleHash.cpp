@@ -9,7 +9,7 @@ const int MAX_DEPTH = 3;
 
 struct Record {
 	int key;
-	string value;
+//	string value;
 };
 
 struct Bucket {
@@ -81,7 +81,7 @@ public:
 			cout << "Bucket " << i << ": ";
 
 			for (int j = 0; j < directories[i].bucket.size; j++){
-				cout << directories[i].bucket.record[j].key << " " << directories[i].bucket.record[j].value << " | ";
+				cout << directories[i].bucket.record[j].key << " | ";
 			}
 			cout << endl;
 		}
@@ -92,16 +92,41 @@ public:
 int main(){
 	ExtendibleHashing eh;
 
-	Record r1 = {4, "hello"};
-	Record r2 = {10, "hello2"};
-	Record r3 = {9, "hello3"};
+	Record r1 = {2};
+	Record r2 = {4};
+	Record r3 = {3};
+	Record r4 = {7};
+	Record r5 = {9};
+	Record r6 = {11};
 
 	eh.insertRecord(r1);
 	eh.insertRecord(r2);
 	eh.insertRecord(r3);
+	eh.insertRecord(r4);
+	eh.insertRecord(r5);
+	eh.insertRecord(r6);
 
 
 	eh.printAll();
 
 	return 0;
 }
+
+int agregarUnoALaIzquierda(int num) {
+	// Encuentra la cantidad de bits en la representación binaria del número
+	int numBits = sizeof(num) * 8;
+	int numOriginalBits = numBits - __builtin_clz(num);
+
+	// Desplaza el número original tantos bits como sean necesarios y añade 1 al inicio
+	int resultado = (1 << numOriginalBits) | num;
+
+	return resultado;
+}
+
+//int main() {
+//	int numero = 13; // Número de ejemplo
+//	int resultado = agregarUnoALaIzquierda(numero);
+//	std::cout << "Numero original: " << numero << " (" << std::bitset<8>(numero) << ")" << std::endl;
+//	std::cout << "Resultado: " << resultado << " (" << std::bitset<8>(resultado) << ")" << std::endl;
+//	return 0;
+//}

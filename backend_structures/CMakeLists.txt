@@ -26,5 +26,4 @@ else()
 endif()
 
 
-add_executable(Hash dataStructures/extendibleHashing/testEH.cpp)
-#add_executable(avl experiments/avlExperiment.cpp)
+add_executable(Hash dataStructures/extendibleHashing/extendibleHash.cpp)
