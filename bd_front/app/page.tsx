@@ -68,9 +68,10 @@ export default function Home() {
           setMessage(data.message);
           setStatus(data.status);
           if (data.status === 'ok') {
+            let body = {};
             switch (data.command) {
               case "CREATE":
-                let body = {
+                body = {
                   "file_name": data.route,
                   "index": data.indexType,
                   "table_name": data.table,
@@ -95,8 +96,28 @@ export default function Home() {
 
                 break;
               case "SELECT":
-
-                console.log("Data selected by one");
+                body = {
+                  "search": data.condition
+                };
+                fetch(api_structures + "select", {
+                  method: "POST",
+                  body: JSON.stringify(body),
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    setMessage(data.message);
+                    setStatus(data.status);
+                    if (data.status === 'success' && data.record) {
+                      //convertir a string el objeto data.record
+                      let records = JSON.stringify(data.record);
+                      // agregar separaciones por cada elemento del objeto. que se imprima de forma bonita
+                      records = records.replace(/,/g, ",\n");
+                      setMessage(records);
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Error:", error);
+                  });
                 break;
               case "RANGE":
                 console.log("Data selected by range");

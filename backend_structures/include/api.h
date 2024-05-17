@@ -157,18 +157,24 @@ inline Api::Api() {
         return crow::response(response);
     });
 
-    CROW_ROUTE(app, "/api/v1/select").methods("GET"_method)
+    CROW_ROUTE(app, "/api/v1/select").methods("POST"_method)
     ([this](const crow::request &req) {
         auto data = crow::json::load(req.body);
         if (!data) {
             return crow::response(400, "Bad request");
         }
         if (!isCreated) {
-            return crow::response(400, "Table not created");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "Table not created";
+            return crow::response(response);
         }
 
         if(!data.has("search")) {
-            return crow::response(400, "No search key provided");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "No search item provided";
+            return crow::response(response);
         }
 
         seachOne = data["search"].u();
@@ -183,9 +189,21 @@ inline Api::Api() {
             //search HASH
         }
         else {
-            const vector<Record<ll>> rec = avlfile.search(seachOne);
+            vector<Record<ll>> rec;
+            try {
+                rec = avlfile.search(seachOne);
+            }
+            catch (exception &e) {
+                cout << e.what() << endl;
+            }
+            catch (...) {
+                cout << "Un error desconocido ocurrió durante la búsqueda." << endl;
+            }
+
             if (rec.empty()) {
-                return crow::response(404, "Record not found");
+                crow::json::wvalue response;
+                response["status"] = "error";
+                response["message"] = "Record not found";
             }
             record = rec[0];
         }
@@ -213,7 +231,7 @@ inline Api::Api() {
         return crow::response(response);
     });
 
-    CROW_ROUTE(app, "/api/v1/range").methods("GET"_method)
+    CROW_ROUTE(app, "/api/v1/range").methods("POST"_method)
     ([this](const crow::request &req) {
         auto data = crow::json::load(req.body);
         if (!data) {
