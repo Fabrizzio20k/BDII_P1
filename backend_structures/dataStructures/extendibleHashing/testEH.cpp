@@ -58,9 +58,9 @@ struct Bucket {
 		return false;
 	}
 
-	Record search(int key){
-		if is
-	}
+//	Record search(int key){
+//		if is
+//	}
 };
 
 
@@ -76,7 +76,7 @@ struct addressRecord {
 
 class ExtendibleHash {
 private:
-	
+
 	string hashFile;
 	string addressTable;
 	int nBuckets;
