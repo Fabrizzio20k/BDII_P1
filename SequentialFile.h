@@ -24,7 +24,7 @@ class SequentialFile {
         explicit Record(T& data) : data(data) {}
     };
 
-    static const int blockSize = (1<<12); // block size in bytes
+    static const int blockSize = (1<<8); // block size in bytes
     static const int blockingFactor = blockSize / sizeof(Record);
 
     int N {blockingFactor}; // number of records in first block to manage in memory
@@ -34,7 +34,7 @@ class SequentialFile {
     int K {}; // maximum number of records in auxiliary space
     int k {}; // current number of records in auxiliary space
     int delCnt {}; // number of removed records
-    int start {}; // position of first element (ordered)
+    int start {1}; // position of first element (ordered)
 
     function<Key(T&)> getKey; // function to extract key from data
     function<int(Key,Key)> cmp; // function to compare two keys: -1 ~= < | 0 ~= == | 1 ~= >
@@ -50,10 +50,10 @@ class SequentialFile {
 
     void setK() {
         switch (mode) {
-            case SEARCH: K = 64 - __builtin_clzll(blockingFactor); break;
+            case SEARCH: K = 32 - __builtin_clz((n?n:N)); break;
             case INSERT:
                 double x {}, m {static_cast<double>(N)};
-                for (double k1 = m; k1 > 0; k1 /= 2) {
+                for (double k1 = m; k1 > 0; k1 /= 2.0) {
                     double p = (x + k1) * (x + k1);
                     while (p < m && m - p < 1e-9) {
                         x+=k1;
@@ -341,6 +341,21 @@ public:
 
     vector<T> range(Key left, Key right) {
         return vector<T>{};
+    }
+
+    void print() {
+        Record record {};
+        cout << "=========MAIN SPACE============\n";
+        for (int i = 1; i <= n; ++i) {
+            record = getRecord(i);
+            cout << record.data;
+        }
+
+        cout << "=======AUXILIARY SPACE==========\n";
+        for (int i = 1; i <= k; ++i) {
+            record = getRecord(n + i);
+            cout << record.data;
+        }
     }
 };
 

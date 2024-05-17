@@ -16,8 +16,10 @@ auto cmp = [](const char* s1, const char* s2)->int{
 void testInsert(vector<Student>& students) {
     SequentialFile<Student,const char*> sf (filename, getKey, cmp);
 
-    for (auto student : students)
+    for (auto student : students) {
         sf.insert(student);
+        sf.print();
+    }
 
     size_t i = size(students);
     students.emplace_back("A011", "Lyzbeth", "Shinozaki", "PSI", 4, 1020.80);
@@ -26,6 +28,7 @@ void testInsert(vector<Student>& students) {
     size_t n = size(students);
     for (; i < n; ++i)
         sf.insert(students[i]);
+
 }
 
 void testSearch(vector<Student>& students) {
@@ -50,7 +53,7 @@ int main() {
             {"A010", "Paco", "Rio", "ADM", 2, 1050.90}
     };
 
-    testInsert(students); // comment for second run to test persistence
+//    testInsert(students); // comment for second run to test persistence
     testSearch(students);
 
     return 0;
