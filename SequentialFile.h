@@ -291,7 +291,7 @@ public:
 
         int pos {0};
         Record record {};
-        for (int x = n - 1; x > 0; x >>= 1) {
+        for (int x = n; x > 0; x >>= 1) {
             while (pos + x <= n) {
                 record = getRecord(pos + x);
                 if (cmp(getKey(record.data), key) == -1) pos += x;
@@ -300,11 +300,8 @@ public:
         }
         while (pos && record.next == -1) record = getRecord(--pos);
 
-        if (pos) record = getRecord(pos);
-        if (pos == 0) {
-            pos = start;
-            record = getRecord(pos);
-        }
+        if (pos == 0) pos = start;
+        record = getRecord(pos);
 
         Record next {};
         while (record.next) {
@@ -314,7 +311,16 @@ public:
             pos = record.next;
             record = next;
         }
-        if (record.next) {
+        if (cmp(getKey(record.data), key) == 0) {
+            start = record.next;
+            record.next = -1;
+            setRecord(record, pos);
+
+            ++delCnt;
+            updateHeader();
+            return true;
+        }
+        else if (record.next) {
             if (cmp(getKey(next.data), key) != 0) return false;
 
             int nextPos = record.next;
@@ -323,15 +329,6 @@ public:
             next.next = -1;
             setRecord(record, pos);
             setRecord(next, nextPos);
-
-            ++delCnt;
-            updateHeader();
-            return true;
-        }
-        else if (cmp(getKey(record.data), key) == 0) {
-            start = record.next;
-            record.next = -1;
-            setRecord(record, pos);
 
             ++delCnt;
             updateHeader();

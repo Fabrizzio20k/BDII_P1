@@ -73,8 +73,8 @@ int main() {
             {"A010", "Paco", "Rio", "ADM", 2, 1050.90}
     };
 
-    testInsert(students); // comment for second run to test persistence
-    testSearch(students);
+//    testInsert(students); // comment for second run to test persistence
+//    testSearch(students);
     testDelete(students);
 
     return 0;
