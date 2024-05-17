@@ -53,24 +53,36 @@ inline Api::Api() {
 
     CROW_ROUTE(app, "/api/v1/create").methods("POST"_method)
     ([this](const crow::request &req) {
-        int i = 0;
+        vector<Record<ll>> records;
         auto data = crow::json::load(req.body);
         //verify if field file_name, table_name, index and column_index are present
         if (!data || !data.has("file_name") || !data.has("table_name") || !data.has("index") || !data.has(
                 "column_index")) {
-            return crow::response(400, "No file_name, table_name, index or column_index provided");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "No file_name, table_name, index or column_index provided";
+            return crow::response(response);
         }
 
         if (data["file_name"] != "appleStore.csv") {
-            return crow::response(400, "File does not exist");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "File name does not exist";
+            return crow::response(response);
         }
 
         if (data["index"] != "ISAM" && data["index"] != "HASH" && data["index"] != "AVL") {
-            return crow::response(400, "Index type not supported");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "Index type not supported";
+            return crow::response(response);
         }
 
         if (data["column_index"] != "id") {
-            return crow::response(400, "Column index not supported");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "Column index not supported";
+            return crow::response(response);
         }
 
         if (data["index"] == "ISAM") {
@@ -102,10 +114,9 @@ inline Api::Api() {
             string line;
             getline(file, line);
 
-            i = 0;
             while (file >> record && file.peek() != EOF) {
                 avlfile.insert(record);
-                i++;
+                records.push_back(record);
             }
             file.close();
         }
@@ -118,11 +129,30 @@ inline Api::Api() {
         crow::json::wvalue response;
         response["status"] = "success";
         response["message"] = "Table created successfully";
-        response["total_records"] = i;
+        response["total_records"] = records.size();
         response["index_type"] = indexType;
         response["table_name"] = tableName;
         response["column_index"] = columnIndex;
         response["file_name"] = fileName;
+
+        for (int i = 0; i < records.size(); i++) {
+            response["records"][i]["id"] = records[i].id;
+            response["records"][i]["track_name"] = records[i].track_name;
+            response["records"][i]["size_bytes"] = records[i].size_bytes;
+            response["records"][i]["currency"] = records[i].currency;
+            response["records"][i]["price"] = records[i].price;
+            response["records"][i]["rating_count_tot"] = records[i].rating_count_tot;
+            response["records"][i]["rating_count_ver"] = records[i].rating_count_ver;
+            response["records"][i]["user_rating"] = records[i].user_rating;
+            response["records"][i]["user_rating_ver"] = records[i].user_rating_ver;
+            response["records"][i]["ver"] = records[i].ver;
+            response["records"][i]["cont_rating"] = records[i].cont_rating;
+            response["records"][i]["prime_genre"] = records[i].prime_genre;
+            response["records"][i]["sup_devices_num"] = records[i].sup_devices_num;
+            response["records"][i]["ipadSc_urls_num"] = records[i].ipadSc_urls_num;
+            response["records"][i]["lang_num"] = records[i].lang_num;
+            response["records"][i]["vpp_lic"] = records[i].vpp_lic;
+        }
 
         return crow::response(response);
     });

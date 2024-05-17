@@ -18,6 +18,7 @@ type parserResponse = {
   route: string;
   status: MessageDisplayProps["status"];
   table: string;
+  values: string[];
 };
 
 const headers: AppleRecordKeys[] = [
@@ -40,16 +41,17 @@ const headers: AppleRecordKeys[] = [
 ];
 
 const api_parser = "http://localhost:5000/api/v1/parser";
-const api_structures = "localhost:5001/api/v1/parser";
+const api_structures = "http://localhost:5001/api/v1/";
 
 export default function Home() {
 
   const [created, isCreated] = useState(false);
   const [sent, isSent] = useState(false);
   const [query, setQuery] = useState('');
+  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState<MessageDisplayProps["status"]>('error');
 
   const [data, setData] = useState<AppleRecord[]>([]);
-  const [response, setResponse] = useState<parserResponse>();
 
   useEffect(() => {
     if (sent) {
@@ -63,13 +65,37 @@ export default function Home() {
       })
         .then((response) => response.json())
         .then((data) => {
-          setResponse(data);
+          setMessage(data.message);
+          setStatus(data.status);
           if (data.status === 'ok') {
             switch (data.command) {
               case "CREATE":
-                console.log("Table created");
+                let body = {
+                  "file_name": data.route,
+                  "index": data.indexType,
+                  "table_name": data.table,
+                  "column_index": data.indexColumn,
+                };
+                fetch(api_structures + "create", {
+                  method: "POST",
+                  body: JSON.stringify(body),
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    setMessage(data.message);
+                    setStatus(data.status);
+                    if (data.status === 'success' && data.records) {
+                      setData(data.records);
+                      isCreated(true);
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Error:", error);
+                  });
+
                 break;
               case "SELECT":
+
                 console.log("Data selected by one");
                 break;
               case "RANGE":
@@ -98,9 +124,9 @@ export default function Home() {
     <main className="h-screen w-auto flex flex-col justify-center items-center bg-gray-900 px-20">
       <SpaceQuery isSent={sent} setSent={isSent} query={query} setQuery={setQuery} />
       <div className="w-full flex justify-start items-start">
-        {response && <MessageDisplay message={response.message} status={response.status} />}
+        <MessageDisplay message={message} status={status} />
       </div>
-      <div>
+      <div className="overflow-x-auto w-11/12">
         {created && <TableQuery data={data} headers={headers} />}
         {!created && (
           <h2 className="text-white text-2xl font-bold my-36">
