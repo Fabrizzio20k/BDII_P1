@@ -29,6 +29,8 @@ struct Directory {
 	char binaryIndex[MAX_DEPTH];
 	Bucket bucket;
 
+	Directory(){}
+
 	Directory(int binaryIndex, int bucketIndex){
 		bitset<3> bit(binaryIndex);
 		string nbit = bit.to_string();
@@ -54,7 +56,7 @@ public:
 		directories.push_back(Directory(12, 1));
 	}
 
-	int getBucketIndex(int key){
+	int getDirectoryIndex(int key){
 		int mask = (1 << globalDepth) - 1;
 		int lsb_k = key & mask;
 		return lsb_k;
@@ -64,15 +66,35 @@ public:
 	Obtains a Record and inserts it into the corresponding Bucket
 	*/
 	void insertRecord(Record record){
-		int bucketIndex = getBucketIndex(record.key);
+		int directory_index  = getDirectoryIndex(record.key);
+		auto bucket = directories[directory_index].bucket;
+		if(directories[directory_index].bucket.size < BLOCK_FACTOR) {
+			directories[directory_index].bucket.record[directories[directory_index].bucket.size++] = record;
+		}
+		else if (bucket.localDepth == globalDepth){
+			 vector<Directory> new_directories(2*directories.size());
+			 for (int i = 0 ; i < directories.size() ; i++) {
+				 if( i == directory_index) {
+					 new_directories[i].bucket = Bucket();
+					 new_directories[f(i)].bucket = Bucket();// en memoria secundaria apunta a last_bucket + 1 , y luego last_bucket++
+				 	 new_directories[i].bucket.localDepth = globalDepth + 1;
+				 	 new_directories[f(i)].bucket.localDepth = globalDepth + 1;
+				 }else{
+					 new_directories[i].bucket = directories[i].bucket;
+					 new_directories[f(i)].bucket = directories[f(i)].bucket;
+				 }
+			 }
 
-		if(directories[bucketIndex].bucket.size < BLOCK_FACTOR){
-			directories[bucketIndex].bucket.record[directories[bucketIndex].bucket.size++] = record;
-		} else {
-			// Split
-			// 1. Incrementar el globalDepth
-			// 2. Duplicar los directorios
-			// 3. Reasignar los registros
+			auto record_array = bucket.record;
+			globalDepth++;
+			for (int i  = 0 ; i < BLOCK_FACTOR ; i++) {
+				auto key = record_array[i].key;
+				int pos = getDirectoryIndex(key);
+				new_directories[pos].bucket.record[new_directories[pos].bucket.size++] = record_array[i];
+			}
+
+			this->directories = new_directories;
+
 		}
 	}
 
