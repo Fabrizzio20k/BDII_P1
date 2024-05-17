@@ -14,9 +14,9 @@ auto cmp = [](const char* s1, const char* s2)->int{
 };
 
 void testInsert(vector<Student>& students) {
-    SequentialFile<Student,const char*> sf (filename, getKey, cmp);
+    SequentialFile<Student, const char *> sf(filename, getKey, cmp);
 
-    for (auto student : students) {
+    for (auto student: students) {
         sf.insert(student);
         sf.print();
     }
@@ -26,16 +26,36 @@ void testInsert(vector<Student>& students) {
     students.emplace_back("A012", "Sachi", "Yui", "INF", 5, 2000.80);
 
     size_t n = size(students);
-    for (; i < n; ++i)
+    for (; i < n; ++i) {
         sf.insert(students[i]);
-
+        sf.print();
+    }
 }
 
 void testSearch(vector<Student>& students) {
     SequentialFile<Student,const char*> sf (filename, getKey, cmp);
     size_t n = size(students);
 
-    for (size_t i = 0; i < n; ++i)
+    for (size_t i = 0; i < n; ++i) {
+        //cout << i << endl;
+        assert(sf.search(students[i].getCode()).second);
+    }
+}
+
+void testDelete(vector<Student> students) {
+    SequentialFile<Student,const char*> sf (filename, getKey, cmp);
+
+    size_t n = size(students);
+
+    for (size_t i = 0; i*2 < n; ++i) {
+        cout << i << endl;
+        assert(sf.remove(students[i].getCode()));
+    }
+
+    for (size_t i = 0; i*2 < n; ++i)
+        assert(!sf.remove(students[i].getCode()));
+
+    for (size_t i = n/2; i < n; ++i)
         assert(sf.search(students[i].getCode()).second);
 }
 
@@ -53,8 +73,9 @@ int main() {
             {"A010", "Paco", "Rio", "ADM", 2, 1050.90}
     };
 
-//    testInsert(students); // comment for second run to test persistence
+    testInsert(students); // comment for second run to test persistence
     testSearch(students);
+    testDelete(students);
 
     return 0;
 }

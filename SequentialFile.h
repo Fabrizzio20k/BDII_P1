@@ -218,8 +218,8 @@ class SequentialFile {
             setRecord(match, pos);
         }
 
-        updateHeader();
         setRecord(record, ++k + n);
+        updateHeader();
 
         return true;
     }
@@ -300,6 +300,7 @@ public:
         }
         while (pos && record.next == -1) record = getRecord(--pos);
 
+        if (pos) record = getRecord(pos);
         if (pos == 0) {
             pos = start;
             record = getRecord(pos);
@@ -314,7 +315,7 @@ public:
             record = next;
         }
         if (record.next) {
-            if (getKey(next) != key) return false;
+            if (cmp(getKey(next.data), key) != 0) return false;
 
             int nextPos = record.next;
 
@@ -327,7 +328,7 @@ public:
             updateHeader();
             return true;
         }
-        else if (cmp(getKey(record), key) == 0) {
+        else if (cmp(getKey(record.data), key) == 0) {
             start = record.next;
             record.next = -1;
             setRecord(record, pos);
