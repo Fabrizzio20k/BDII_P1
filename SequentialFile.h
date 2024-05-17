@@ -236,13 +236,16 @@ class SequentialFile {
         n = n + k - delCnt;
         k = 0;
         delCnt = 0;
+        start = 1;
         setK();
         setHeader();
 
-        for (; ind < n; ++ind) {
+        for (; ind < n - 1; ++ind) {
             records[ind].next = ind + 2;
             setRecord(records[ind], ind + 1);
         }
+        records[n - 1].next = 0;
+        setRecord(records[n - 1], n);
     }
 
 public:
@@ -298,7 +301,11 @@ public:
                 else break;
             }
         }
-        while (pos && record.next == -1) record = getRecord(--pos);
+        while (pos) {
+            record = getRecord(pos);
+            if (record.next >= 0) break;
+            --pos;
+        }
 
         if (pos == 0) pos = start;
         record = getRecord(pos);
