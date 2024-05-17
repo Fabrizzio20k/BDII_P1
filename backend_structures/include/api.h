@@ -28,7 +28,7 @@ private:
     string columnIndex;
     string indexType;
     string fileName;
-    ll seachOne{};
+    ll searchOne{};
     ll searchTwo{};
 };
 
@@ -53,24 +53,36 @@ inline Api::Api() {
 
     CROW_ROUTE(app, "/api/v1/create").methods("POST"_method)
     ([this](const crow::request &req) {
-        int i = 0;
+        vector<Record<ll>> records;
         auto data = crow::json::load(req.body);
         //verify if field file_name, table_name, index and column_index are present
         if (!data || !data.has("file_name") || !data.has("table_name") || !data.has("index") || !data.has(
                 "column_index")) {
-            return crow::response(400, "No file_name, table_name, index or column_index provided");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "No file_name, table_name, index or column_index provided";
+            return crow::response(response);
         }
 
         if (data["file_name"] != "appleStore.csv") {
-            return crow::response(400, "File does not exist");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "File name does not exist";
+            return crow::response(response);
         }
 
         if (data["index"] != "ISAM" && data["index"] != "HASH" && data["index"] != "AVL") {
-            return crow::response(400, "Index type not supported");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "Index type not supported";
+            return crow::response(response);
         }
 
         if (data["column_index"] != "id") {
-            return crow::response(400, "Column index not supported");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "Column index not supported";
+            return crow::response(response);
         }
 
         if (data["index"] == "ISAM") {
@@ -102,14 +114,12 @@ inline Api::Api() {
             string line;
             getline(file, line);
 
-            i = 0;
             while (file >> record && file.peek() != EOF) {
                 avlfile.insert(record);
-                i++;
             }
             file.close();
         }
-
+        records = avlfile.inorder();
         isCreated = true;
         tableName = string{data["table_name"]};
         columnIndex = string{data["column_index"]};
@@ -118,33 +128,57 @@ inline Api::Api() {
         crow::json::wvalue response;
         response["status"] = "success";
         response["message"] = "Table created successfully";
-        response["total_records"] = i;
+        response["total_records"] = records.size();
         response["index_type"] = indexType;
         response["table_name"] = tableName;
         response["column_index"] = columnIndex;
         response["file_name"] = fileName;
 
+        for (int i = 0; i < records.size(); i++) {
+            response["records"][i]["id"] = records[i].id;
+            response["records"][i]["track_name"] = records[i].track_name;
+            response["records"][i]["size_bytes"] = records[i].size_bytes;
+            response["records"][i]["currency"] = records[i].currency;
+            response["records"][i]["price"] = records[i].price;
+            response["records"][i]["rating_count_tot"] = records[i].rating_count_tot;
+            response["records"][i]["rating_count_ver"] = records[i].rating_count_ver;
+            response["records"][i]["user_rating"] = records[i].user_rating;
+            response["records"][i]["user_rating_ver"] = records[i].user_rating_ver;
+            response["records"][i]["ver"] = records[i].ver;
+            response["records"][i]["cont_rating"] = records[i].cont_rating;
+            response["records"][i]["prime_genre"] = records[i].prime_genre;
+            response["records"][i]["sup_devices_num"] = records[i].sup_devices_num;
+            response["records"][i]["ipadSc_urls_num"] = records[i].ipadSc_urls_num;
+            response["records"][i]["lang_num"] = records[i].lang_num;
+            response["records"][i]["vpp_lic"] = records[i].vpp_lic;
+        }
+
         return crow::response(response);
     });
 
-    CROW_ROUTE(app, "/api/v1/select").methods("GET"_method)
+    CROW_ROUTE(app, "/api/v1/select").methods("POST"_method)
     ([this](const crow::request &req) {
         auto data = crow::json::load(req.body);
         if (!data) {
             return crow::response(400, "Bad request");
         }
         if (!isCreated) {
-            return crow::response(400, "Table not created");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "Table not created";
+            return crow::response(response);
         }
 
         if(!data.has("search")) {
-            return crow::response(400, "No search key provided");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "No search item provided";
+            return crow::response(response);
         }
 
-        seachOne = data["search"].u();
+        searchOne = data["search"].u();
 
-
-        Record<ll> record;
+        vector<Record<ll>> records;
 
         if (indexType == "ISAM") {
             //search ISAM
@@ -153,37 +187,39 @@ inline Api::Api() {
             //search HASH
         }
         else {
-            const vector<Record<ll>> rec = avlfile.search(seachOne);
-            if (rec.empty()) {
-                return crow::response(404, "Record not found");
+            records = avlfile.rangeSearch(searchOne, searchOne);
+            if (records.empty()) {
+                crow::json::wvalue response;
+                response["status"] = "error";
+                response["message"] = "Record not found";
+                return crow::response(response);
             }
-            record = rec[0];
         }
 
         crow::json::wvalue response;
         response["status"] = "success";
         response["message"] = "Record selected successfully";
-        response["record"]["id"] = record.id;
-        response["record"]["track_name"] = record.track_name;
-        response["record"]["size_bytes"] = record.size_bytes;
-        response["record"]["currency"] = record.currency;
-        response["record"]["price"] = record.price;
-        response["record"]["rating_count_tot"] = record.rating_count_tot;
-        response["record"]["rating_count_ver"] = record.rating_count_ver;
-        response["record"]["user_rating"] = record.user_rating;
-        response["record"]["user_rating_ver"] = record.user_rating_ver;
-        response["record"]["ver"] = record.ver;
-        response["record"]["cont_rating"] = record.cont_rating;
-        response["record"]["prime_genre"] = record.prime_genre;
-        response["record"]["sup_devices_num"] = record.sup_devices_num;
-        response["record"]["ipadSc_urls_num"] = record.ipadSc_urls_num;
-        response["record"]["lang_num"] = record.lang_num;
-        response["record"]["vpp_lic"] = record.vpp_lic;
+        response["record"]["id"] = records[0].id;
+        response["record"]["track_name"] = records[0].track_name;
+        response["record"]["size_bytes"] = records[0].size_bytes;
+        response["record"]["currency"] = records[0].currency;
+        response["record"]["price"] = records[0].price;
+        response["record"]["rating_count_tot"] = records[0].rating_count_tot;
+        response["record"]["rating_count_ver"] = records[0].rating_count_ver;
+        response["record"]["user_rating"] = records[0].user_rating;
+        response["record"]["user_rating_ver"] = records[0].user_rating_ver;
+        response["record"]["ver"] = records[0].ver;
+        response["record"]["cont_rating"] = records[0].cont_rating;
+        response["record"]["prime_genre"] = records[0].prime_genre;
+        response["record"]["sup_devices_num"] = records[0].sup_devices_num;
+        response["record"]["ipadSc_urls_num"] = records[0].ipadSc_urls_num;
+        response["record"]["lang_num"] = records[0].lang_num;
+        response["record"]["vpp_lic"] = records[0].vpp_lic;
 
         return crow::response(response);
     });
 
-    CROW_ROUTE(app, "/api/v1/range").methods("GET"_method)
+    CROW_ROUTE(app, "/api/v1/range").methods("POST"_method)
     ([this](const crow::request &req) {
         auto data = crow::json::load(req.body);
         if (!data) {
@@ -191,14 +227,20 @@ inline Api::Api() {
         }
 
         if (!isCreated) {
-            return crow::response(400, "Table not created");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "Table not created";
+            return crow::response(response);
         }
 
         if(!data.has("r1") || !data.has("r2")) {
-            return crow::response(400, "No complete aitems for search range provided");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "No items for search range provided";
+            return crow::response(response);
         }
 
-        seachOne = data["r1"].u();
+        searchOne = data["r1"].u();
         searchTwo = data["r2"].u();
 
         vector<Record<ll>> records;
@@ -207,15 +249,19 @@ inline Api::Api() {
             //search ISAM
         }
         else if (indexType == "HASH") {
-            return crow::response(400, "Search range not supported for HASH index");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "Hash index does not support range search";
+            return crow::response(response);
         }
         else {
-            cout << "Searching range " << seachOne << " to " << searchTwo << endl;
-            records = avlfile.rangeSearch(seachOne, searchTwo);
+            records = avlfile.rangeSearch(searchOne, searchTwo);
             if (records.empty()) {
-                return crow::response(404, "Records between range not found");
+                crow::json::wvalue response;
+                response["status"] = "error";
+                response["message"] = "Records not found in search range";
+                return crow::response(response);
             }
-            cout << "Records found: " << records.size() << endl;
         }
 
         crow::json::wvalue response;
@@ -246,15 +292,22 @@ inline Api::Api() {
     CROW_ROUTE(app, "/api/v1/insert").methods("POST"_method)
     ([this](const crow::request &req) {
         auto data = crow::json::load(req.body);
+        vector<Record<ll>> records;
         if (!data) {
             return crow::response(400, "Bad request");
         }
         if(!data.has("record")) {
-            return crow::response(400, "Record not provided");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "No record provided";
+            return crow::response(response);
         }
 
         if (!isCreated) {
-            return crow::response(400, "Table not created");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "Table not created";
+            return crow::response(response);
         }
 
         Record<ll> record;
@@ -297,27 +350,53 @@ inline Api::Api() {
         }
         else {
             avlfile.insert(record);
+            records = avlfile.inorder();
         }
 
         crow::json::wvalue response;
         response["status"] = "success";
         response["message"] = "Record inserted successfully";
         response["id"] = avlfile.search(record.id)[0].id;
+        for (int i = 0; i < records.size(); i++) {
+            response["records"][i]["id"] = records[i].id;
+            response["records"][i]["track_name"] = records[i].track_name;
+            response["records"][i]["size_bytes"] = records[i].size_bytes;
+            response["records"][i]["currency"] = records[i].currency;
+            response["records"][i]["price"] = records[i].price;
+            response["records"][i]["rating_count_tot"] = records[i].rating_count_tot;
+            response["records"][i]["rating_count_ver"] = records[i].rating_count_ver;
+            response["records"][i]["user_rating"] = records[i].user_rating;
+            response["records"][i]["user_rating_ver"] = records[i].user_rating_ver;
+            response["records"][i]["ver"] = records[i].ver;
+            response["records"][i]["cont_rating"] = records[i].cont_rating;
+            response["records"][i]["prime_genre"] = records[i].prime_genre;
+            response["records"][i]["sup_devices_num"] = records[i].sup_devices_num;
+            response["records"][i]["ipadSc_urls_num"] = records[i].ipadSc_urls_num;
+            response["records"][i]["lang_num"] = records[i].lang_num;
+            response["records"][i]["vpp_lic"] = records[i].vpp_lic;
+        }
         return crow::response(response);
     });
 
     CROW_ROUTE(app, "/api/v1/delete").methods("DELETE"_method)
     ([this](const crow::request &req) {
         auto data = crow::json::load(req.body);
+        vector<Record<ll>> records;
         if (!data) {
             return crow::response(400, "Bad request");
         }
         if(!data.has("id")) {
-            return crow::response(400, "id not provided");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "No id provided";
+            return crow::response(response);
         }
 
         if (!isCreated) {
-            return crow::response(400, "Table not created");
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "Table not created";
+            return crow::response(response);
         }
 
         if (indexType == "ISAM") {
@@ -329,13 +408,35 @@ inline Api::Api() {
         else {
             bool res = avlfile.remove(data["id"].u());
             if (!res) {
-                return crow::response(404, "Record not found");
+                crow::json::wvalue response;
+                response["status"] = "error";
+                response["message"] = "Record not found. Cannot delete";
+                return crow::response(response);
             }
+            records = avlfile.inorder();
         }
 
         crow::json::wvalue response;
         response["status"] = "success";
         response["message"] = "Record deleted successfully";
+        for (int i = 0; i < records.size(); i++) {
+            response["records"][i]["id"] = records[i].id;
+            response["records"][i]["track_name"] = records[i].track_name;
+            response["records"][i]["size_bytes"] = records[i].size_bytes;
+            response["records"][i]["currency"] = records[i].currency;
+            response["records"][i]["price"] = records[i].price;
+            response["records"][i]["rating_count_tot"] = records[i].rating_count_tot;
+            response["records"][i]["rating_count_ver"] = records[i].rating_count_ver;
+            response["records"][i]["user_rating"] = records[i].user_rating;
+            response["records"][i]["user_rating_ver"] = records[i].user_rating_ver;
+            response["records"][i]["ver"] = records[i].ver;
+            response["records"][i]["cont_rating"] = records[i].cont_rating;
+            response["records"][i]["prime_genre"] = records[i].prime_genre;
+            response["records"][i]["sup_devices_num"] = records[i].sup_devices_num;
+            response["records"][i]["ipadSc_urls_num"] = records[i].ipadSc_urls_num;
+            response["records"][i]["lang_num"] = records[i].lang_num;
+            response["records"][i]["vpp_lic"] = records[i].vpp_lic;
+        }
         return crow::response(response);
     });
 }

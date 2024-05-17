@@ -38,11 +38,11 @@ private:
     Command cmd;
     bool parseCommand()
     {
-        regex createRegex(R"(create table (\w+) from file \"(.+)\" using (HASH|ISAM|AVL) INDEX \(\"(\w+)\"\))");
-        regex selectRegex(R"(select \* from (\w+) where (\w+) = (.+))");
-        regex rangeRegex(R"(select \* from (\w+) where (\w+) between (.+) and (.+))");
-        regex insertRegex(R"(insert into (\w+) values \((.+)\))");
-        regex deleteRegex(R"(delete from (\w+) where (\w+) = (.+))");
+        regex createRegex(R"(create table (\w+) from file \"(.+)\" using (HASH|ISAM|AVL) INDEX \(\"(\w+)\"\);)");
+        regex selectRegex(R"(select \* from (\w+) where (\w+) = (.+);)");
+        regex rangeRegex(R"(select \* from (\w+) where (\w+) between (.+) and (.+);)");
+        regex insertRegex(R"(insert into (\w+) values \((.+)\);)");
+        regex deleteRegex(R"(delete from (\w+) where (\w+) = (.+);)");
 
         smatch matches;
 
@@ -104,6 +104,7 @@ private:
             }
             string values = matches[2];
             string value;
+            cmd.values.clear();
             for (char c : values)
             {
                 if (c == ',')
