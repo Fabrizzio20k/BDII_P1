@@ -37,7 +37,7 @@ class SequentialFile {
     int start {}; // position of first element (ordered)
 
     function<Key(T&)> getKey; // function to extract key from data
-    function<bool(Key,Key)> cmp; // function to compare two keys: -1 ~= < | 0 ~= == | 1 ~= >
+    function<int(Key,Key)> cmp; // function to compare two keys: -1 ~= < | 0 ~= == | 1 ~= >
 
     char filename[50];
 
@@ -135,13 +135,14 @@ class SequentialFile {
     pair<Record,int> _search(Key key) {
         int pos {0};
         Record record {};
-        for (int x = n - 1; x > 0; x >>= 1) {
+        for (int x = n; x > 0; x >>= 1) {
             while (pos + x <= n) {
                 record = getRecord(pos + x);
                 if (cmp(getKey(record.data), key) < 1) pos += x;
                 else break;
             }
         }
+        if (pos) record = getRecord(pos);
         while (pos && record.next == -1) record = getRecord(--pos);
         return {record, pos};
     }
@@ -245,7 +246,7 @@ class SequentialFile {
     }
 
 public:
-    SequentialFile(const char* filename, function<Key(T&)> getKey, function<bool(Key,Key)> cmp, bool searchMode=true) : getKey(getKey), cmp(cmp) {
+    SequentialFile(const char* filename, function<Key(T&)> getKey, function<int(Key,Key)> cmp, bool searchMode=true) : getKey(getKey), cmp(cmp) {
         strcpy(this->filename, filename);
 
         if (!searchMode) mode = INSERT;
