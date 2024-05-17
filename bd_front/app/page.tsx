@@ -108,11 +108,9 @@ export default function Home() {
                     setMessage(data.message);
                     setStatus(data.status);
                     if (data.status === 'success' && data.record) {
-                      //convertir a string el objeto data.record
                       let records = JSON.stringify(data.record);
-                      // agregar separaciones por cada elemento del objeto. que se imprima de forma bonita
                       records = records.replace(/,/g, ",\n");
-                      setMessage(records);
+                      setMessage("Record found: " + records);
                     }
                   })
                   .catch((error) => {
@@ -120,13 +118,88 @@ export default function Home() {
                   });
                 break;
               case "RANGE":
-                console.log("Data selected by range");
+                body = {
+                  "r1": data.r1,
+                  "r2": data.r2,
+                };
+                fetch(api_structures + "range", {
+                  method: "POST",
+                  body: JSON.stringify(body),
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    setMessage(data.message);
+                    setStatus(data.status);
+                    if (data.status === 'success' && data.records) {
+                      setData(data.records);
+                      setMessage("Records found: " + data.records.length + " records. You can see them in the table below.");
+                    }
+                    else {
+                      setData([]);
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Error:", error);
+                  });
                 break;
               case "INSERTAR":
-                console.log("Data inserted");
+                body = {
+                  "record": {
+                    "id": parseInt(data.values[0]),
+                    "track_name": data.values[1],
+                    "size_bytes": parseInt(data.values[2]),
+                    "currency": data.values[3],
+                    "price": parseFloat(data.values[4]),
+                    "rating_count_tot": parseInt(data.values[5]),
+                    "rating_count_ver": parseInt(data.values[6]),
+                    "user_rating": parseFloat(data.values[7]),
+                    "user_rating_ver": parseFloat(data.values[8]),
+                    "ver": data.values[9],
+                    "cont_rating": data.values[10],
+                    "prime_genre": data.values[11],
+                    "sup_devices_num": parseInt(data.values[12]),
+                    "ipadSc_urls_num": parseInt(data.values[13]),
+                    "lang_num": parseInt(data.values[14]),
+                    "vpp_lic": parseInt(data.values[15]),
+                  }
+                };
+                fetch(api_structures + "insert", {
+                  method: "POST",
+                  body: JSON.stringify(body),
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    setMessage(data.message);
+                    setStatus(data.status);
+                    if (data.status === 'success' && data.records) {
+                      setData(data.records);
+                      setMessage("Record inserted: " + data.id);
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Error:", error);
+                  });
+
                 break;
               case "BORRAR":
-                console.log("Data deleted");
+                body = {
+                  "id": data.condition
+                };
+                fetch(api_structures + "delete", {
+                  method: "DELETE",
+                  body: JSON.stringify(body),
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    setMessage(data.message);
+                    setStatus(data.status);
+                    if (data.status === 'success' && data.records) {
+                      setData(data.records);
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Error:", error);
+                  });
                 break;
               default:
                 console.log("No command found");
