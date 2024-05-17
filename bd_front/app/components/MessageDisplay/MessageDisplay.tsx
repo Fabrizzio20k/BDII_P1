@@ -1,7 +1,4 @@
-export type MessageDisplayProps = {
-    message: string;
-    status: 'success' | 'error';
-};
+import { MessageDisplayProps } from "@/app/types/messageDisplay";
 
 export default function MessageDisplay({ message, status }: MessageDisplayProps) {
     return (

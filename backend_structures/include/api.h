@@ -439,6 +439,55 @@ inline Api::Api() {
         }
         return crow::response(response);
     });
+
+    CROW_ROUTE(app, "/api/v1/get_all").methods("GET"_method)
+    ([this](const crow::request &req) {
+        vector<Record<ll>> records;
+
+        if (!isCreated) {
+            crow::json::wvalue response;
+            response["status"] = "error";
+            response["message"] = "Table not created";
+            return crow::response(response);
+        }
+
+        if (indexType == "ISAM") {
+            // get all ISAM
+        }
+        else if (indexType == "HASH") {
+            // get all HASH
+        }
+        else
+        {
+            records = avlfile.inorder();
+        }
+
+
+        crow::json::wvalue response;
+        response["status"] = "success";
+        response["message"] = "Records updated successfully";
+
+        for (int i = 0; i < records.size(); i++) {
+            response["records"][i]["id"] = records[i].id;
+            response["records"][i]["track_name"] = records[i].track_name;
+            response["records"][i]["size_bytes"] = records[i].size_bytes;
+            response["records"][i]["currency"] = records[i].currency;
+            response["records"][i]["price"] = records[i].price;
+            response["records"][i]["rating_count_tot"] = records[i].rating_count_tot;
+            response["records"][i]["rating_count_ver"] = records[i].rating_count_ver;
+            response["records"][i]["user_rating"] = records[i].user_rating;
+            response["records"][i]["user_rating_ver"] = records[i].user_rating_ver;
+            response["records"][i]["ver"] = records[i].ver;
+            response["records"][i]["cont_rating"] = records[i].cont_rating;
+            response["records"][i]["prime_genre"] = records[i].prime_genre;
+            response["records"][i]["sup_devices_num"] = records[i].sup_devices_num;
+            response["records"][i]["ipadSc_urls_num"] = records[i].ipadSc_urls_num;
+            response["records"][i]["lang_num"] = records[i].lang_num;
+            response["records"][i]["vpp_lic"] = records[i].vpp_lic;
+        }
+
+        return crow::response(response);
+    });
 }
 
 inline void Api::run() {
