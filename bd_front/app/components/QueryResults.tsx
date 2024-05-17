@@ -10,22 +10,28 @@ function extractAttributeStrings(data: any[]): string[] {
     return attributeStrings;
 }
 
-const Table = ({ key, data, data_index }) => {
+type TableProps = {
+    key: number;
+    data: any;
+    data_index: string[];
+};
+
+const Table = ({ key, data, data_index }: TableProps) => {
     return (
         <tbody>
             <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                {data_index.map((attribute, index)  => (
+                {data_index.map((attribute, index) => (
                     <td key={index} className="px-6 py-4">{data[attribute]}</td>
                 ))}
             </tr>
-                {/* <th
+            {/* <th
                     scope="row"
                     className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                 >
                     {tablename}
                 </th> */}
-                {/* <td className="px-6 py-4">{numberofelements}</td> */}
-            
+            {/* <td className="px-6 py-4">{numberofelements}</td> */}
+
         </tbody>
 
     );
@@ -51,8 +57,8 @@ const QueryResults = () => {
                 {data.map((data, index) => (
                     <Table
                         key={index}
-                        data = {data}   
-                        data_index = {data_index}
+                        data={data}
+                        data_index={data_index}
                     />
                 ))}
             </table>
