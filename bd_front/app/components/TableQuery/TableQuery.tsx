@@ -18,7 +18,7 @@ export default function TableQuery({ data, headers }: { data: AppleRecord[], hea
     }, [page, data]);
 
     return (
-        <Table isStriped isBordered isHoverable isResponsive
+        <Table isStriped
             aria-label="Table of Apple Store data"
 
             bottomContent={
