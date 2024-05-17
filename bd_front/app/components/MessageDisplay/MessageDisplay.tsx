@@ -1,4 +1,4 @@
-type MessageDisplayProps = {
+export type MessageDisplayProps = {
     message: string;
     status: 'success' | 'error';
 };
