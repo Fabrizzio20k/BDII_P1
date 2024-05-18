@@ -30,7 +30,7 @@ class BPlusTree {
     function<bool(Record&,Record&)> recordCmp; // function to compare two keys: -1 ~= < | 0 ~= == | 1 ~= >
 
     int root {}; // pointer to root
-    int lastDel {}; // pointer to last deleted block
+    int lastDel {-1}; // pointer to last deleted block
     int headerSize {sizeof(root) + sizeof(lastDel)};
 
     char filename[50];
@@ -61,7 +61,7 @@ class BPlusTree {
 
     int allocatePos() {
         int pos {};
-        if (lastDel) {
+        if (lastDel >= 0) {
             Leaf leaf = getLeaf(lastDel);
             pos = lastDel;
             lastDel = leaf.nextDel;
@@ -71,7 +71,8 @@ class BPlusTree {
         }
         else {
             fstream f (filename, ios::in | ios::out | ios::binary);
-            f.seekg(ios::end);
+            f.seekg(0,ios::end);
+            int fuckyou = f.tellg();
             pos = getLastPos(f.tellg());
             f.close();
             return pos;
@@ -102,7 +103,7 @@ class BPlusTree {
     void setLeaf(Leaf& leaf, int pos) {
         fstream f (filename, ios::in | ios::out | ios::binary);
         f.seekp(getPtr(pos));
-        f.write(reinterpret_cast<char*>(&leaf), sizeof(blockSize));
+        f.write(reinterpret_cast<char*>(&leaf), blockSize);
         f.close();
     }
 
@@ -209,12 +210,13 @@ class BPlusTree {
         s.leaf = false;
         s.c[0] = root;
         root = allocatePos();
+        setNode(s, root);
         _splitChild(s, root, 0);
     }
 
     bool _insertNonFullLeaf(Leaf x, int pos, Key key, Record& record) {
         int match {};
-        for (int k = 0; k < x.n; k >>= 1)
+        for (int k = x.n - 1; k > 0; k >>= 1)
             while (match + k < x.n && getKey(x.records[match + k]) <= key) match += k;
         if (getKey(x.records[match]) == key) return false;
 
@@ -240,7 +242,7 @@ class BPlusTree {
                 if (x.k[i] <= key) ++i;
                 child = getLeaf(x.c[i]);
             }
-            return _insertNonFullLeaf(child, x.c[i], key);
+            return _insertNonFullLeaf(child, x.c[i], key, record);
         }
         else {
             Node child = getNode(x.c[i]);
@@ -249,12 +251,31 @@ class BPlusTree {
                 if (x.k[i] <= key) ++i;
                 child = getNode(x.c[i]);
             }
-            return _insertNonFull(child, x.c[i], key);
+            return _insertNonFull(child, x.c[i], key, record);
         }
     }
 
-    pair<Record,bool> _search(Node x, Key key) {
+    pair<Record,bool> _search(Leaf x, Key key) {
+        int i {};
+        for (int k = x.n - 1; k > 0; k >>= 1)
+            while (i + k < x.n && getKey(x.records[i + k]) <= key) i += k;
+        if (getKey(x.records[i]) == key) return {x.records[i], true};
 
+        return {Record{}, false};
+    }
+
+    pair<Record,bool> _search(Node x, Key key) {
+        int i {};
+        for (; i < x.n; ++i)
+            if (x.k[i] > key) break;
+        if (x.leaf) {
+            Leaf y = getLeaf(x.c[i]);
+            return _search(y, key);
+        }
+        else {
+            Node y = getNode(x.c[i]);
+            return _search(y, key);
+        }
     }
 
 
@@ -269,7 +290,7 @@ public:
 
         if (exists) getHeader();
         else {
-            setHeader();
+            createHeader();
             Node r {};
             setNode(r, root);
         }
@@ -278,7 +299,10 @@ public:
     ~BPlusTree() = default;
 
     pair<Record,bool> search(Key key) {
+        Node r = getNode(root);
+        if (r.n == 0) return {Record{}, false};
 
+        return _search(r, key);
     }
 
     bool insert(Record record) {
@@ -292,8 +316,10 @@ public:
             if (rPos == lPos) ++rPos;
             Leaf leftChild {};
             Leaf rightChild (1);
+            leftChild.next = rPos;
             rightChild.records[0] = record;
 
+            ++r.n;
             r.k[0] = key;
             r.c[0] = lPos;
             r.c[1] = rPos;
@@ -311,7 +337,7 @@ public:
             r = getNode(root);
         }
 
-        return _insertNonFull(r, root, key);
+        return _insertNonFull(r, root, key, record);
     }
 
     bool remove(Key key) {
