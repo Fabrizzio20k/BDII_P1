@@ -17,19 +17,13 @@ auto getKey = [](Student& s){ return s.getId(); };
 void testInsert(vector<Student>& students) {
     BPlusTree<Student,int,sizeof(int)> btree (filename, getKey, cmp);
 
-    for (auto student: students) {
-        btree.insert(student);
-    }
-
-    size_t i = size(students);
     students.emplace_back(20, "Sachi", "Yui", "INF", 5, 2000.80);
     students.emplace_back(19, "Lyzbeth", "Shinozaki", "PSI", 4, 1020.80);
 
-    size_t n = size(students);
-    for (; i < n; ++i) {
-        btree.insert(students[i]);
-//        if (!btree.search(students[i].getId()).second) {
-//            cout << students[i].getId() << '\n';
+    for (auto student: students) {
+        btree.insert(student);
+//        if (student.getId() >= 42 && !btree.search(42).second) {
+//            cout << student.getId() << '\n';
 //            break;
 //        }
     }
@@ -39,12 +33,22 @@ void testSearch(vector<Student>& students) {
     BPlusTree<Student,int,sizeof(int)> btree (filename, getKey, cmp);
 
     for (auto student: students) {
-        cout << student.getId() << '\n';
         assert(btree.search(student.getId()).second);
     }
     assert(!btree.search(0).second);
     assert(!btree.search(15).second);
     assert(!btree.search(18).second);
+}
+
+void testInsert2() {
+    BPlusTree<Student,int,sizeof(int)> btree (filename, getKey, cmp);
+
+    for (int i = 104; i < 111; ++i) {
+        string surname = "surname" + to_string(i);
+        string lastname = "lastname" + to_string(i);
+        Student student (i, surname.c_str(), lastname.c_str(), "CSC", 9, 3500);
+        btree.insert(student);
+    }
 }
 
 int main() {
@@ -61,13 +65,14 @@ int main() {
             {6, "Leo", "Vega", "ARQ", 2, 1350.45}
     };
 
-    for (int i = 0; i < 200; ++i) {
+    for (int i = 21; i < 121; ++i) {
         string surname = "surname" + to_string(i);
         string lastname = "lastname" + to_string(i);
         students.emplace_back(i + 21, surname.c_str(), lastname.c_str(), "CSC", 9, 3500);
     }
 
-    testInsert(students);
+//    testInsert(students);
+//    testInsert2();
     testSearch(students);
 
     return 0;

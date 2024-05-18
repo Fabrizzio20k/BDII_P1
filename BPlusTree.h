@@ -248,7 +248,7 @@ class BPlusTree {
         }
         else {
             Node child = getNode(x.c[i]);
-            if (child.n == (t<<1)) {
+            if (child.n == (t<<1) - 1) {
                 x = _splitChild(x, pos, i);
                 if (x.k[i] <= key) ++i;
                 child = getNode(x.c[i]);
