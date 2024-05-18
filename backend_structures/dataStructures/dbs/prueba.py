@@ -4,11 +4,9 @@ from faker import Faker
 
 fake = Faker()
 
-# Cargamos el dataset
-df = pd.read_csv("AppleStore.csv", encoding='utf-8')
-
 # load all ids
-ids = set(df['id'])
+ids = set()
+
 
 def generate_version():
     # Generar una versión con formato de "10", "9.4.5", "7.23.2"
@@ -21,6 +19,7 @@ def generate_version():
         return f"{major}.{minor}"
     return f"{major}"
 
+
 def generate_track_name(max_length):
     words = []
     while len(' '.join(words)) < max_length:
@@ -31,6 +30,7 @@ def generate_track_name(max_length):
             break
     track_name = ' '.join(words)
     return track_name[:max_length]
+
 
 def generate_data():
     # create an id that is not in the dataset
@@ -58,18 +58,37 @@ def generate_data():
     ids.add(id)
     return data
 
+
 new_data = []
+
+for _ in range(1000):
+    new_data.append(generate_data())
+
+new_df = pd.DataFrame(new_data)
+ids.clear()
+new_data.clear()
+new_df.to_csv('test_1000.csv', index=False)
+
+for _ in range(10000):
+    new_data.append(generate_data())
+
+new_df = pd.DataFrame(new_data)
+ids.clear()
+new_data.clear()
+new_df.to_csv('test_10000.csv', index=False)
+
+for _ in range(100000):
+    new_data.append(generate_data())
+
+new_df = pd.DataFrame(new_data)
+ids.clear()
+new_data.clear()
+new_df.to_csv('test_100000.csv', index=False)
 
 for _ in range(1000000):
     new_data.append(generate_data())
 
 new_df = pd.DataFrame(new_data)
-
-print(new_df.shape)
-print(df.shape)
-
-# Concatenar el DataFrame original con el nuevo DataFrame
-df = pd.concat([df, new_df], ignore_index=True)
-
-# Imprimir la forma del DataFrame final
-print(df.shape)
+ids.clear()
+new_data.clear()
+new_df.to_csv('test_1000000.csv', index=False)

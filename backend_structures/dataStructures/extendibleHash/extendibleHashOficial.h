@@ -6,7 +6,6 @@
 #include <set>
 #include <sstream>
 #include <cstring>
-#include "appleRecord.h"
 #define ll long long
 using namespace std;
 
@@ -393,7 +392,6 @@ public:
 
         file_meta.close();
         filedir.close();
-
     }
 
     ExtendibleHash()
