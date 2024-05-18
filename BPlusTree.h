@@ -9,6 +9,7 @@
 #include <fstream>
 #include <functional>
 #include <vector>
+#include <cstring>
 using namespace std;
 
 // clustered B+ tree
@@ -26,6 +27,7 @@ class BPlusTree {
 
     function<Key(Record&)> getKey; // function to extract key from record
     function<int(Key,Key)> cmp; // function to compare two keys: -1 ~= < | 0 ~= == | 1 ~= >
+    function<bool(Record&,Record&)> recordCmp; // function to compare two keys: -1 ~= < | 0 ~= == | 1 ~= >
 
     int root {}; // pointer to root
     int lastDel {}; // pointer to last deleted block
@@ -51,9 +53,11 @@ class BPlusTree {
         friend BPlusTree;
     public:
         Leaf() = default;
+        explicit Leaf(int n) : n(n) {}
     };
 
     int getPtr(int pos) { return headerSize + pos * blockSize; }
+    int getLastPos(int end)  { return (end - headerSize) / blockSize; }
 
     int allocatePos() {
         int pos {};
@@ -68,7 +72,7 @@ class BPlusTree {
         else {
             fstream f (filename, ios::in | ios::out | ios::binary);
             f.seekg(ios::end);
-            pos = f.tellg();
+            pos = getLastPos(f.tellg());
             f.close();
             return pos;
         }
@@ -107,7 +111,7 @@ class BPlusTree {
         f.seekg(getPtr(pos));
 
         Leaf leaf {};
-        f.read(reinterpret_cast<char*>(&leaf), blockSize);
+        f.read(reinterpret_cast<char*>(&leaf), sizeof(Leaf));
 
         f.close();
         return leaf;
@@ -125,17 +129,13 @@ class BPlusTree {
 
         Node node {};
         f.seekg(getPtr(pos));
-        f.read(reinterpret_cast<char*>(&node), blockSize);
+        f.read(reinterpret_cast<char*>(&node), sizeof(Node));
 
         f.close();
         return node;
     }
 
-    pair<Record,bool> _search(Node x, Key key) {
-
-    }
-
-    void _splitChild(Node x, int pos, int i) {
+    Node _splitChild(Node x, int pos, int i) {
         Node y = getNode(x.c[i]);
         Node z {};
         // move y's last t-1 keys to z
@@ -166,36 +166,158 @@ class BPlusTree {
         setNode(x, pos);
         setNode(y, x.c[i]);
         setNode(z, x.c[i + 1]);
+
+        return x;
     }
 
-    void _splitLeaf(Node x, int i) {
+    Node _splitLeafChild(Node x, int pos, int i) {
+        Leaf y = getLeaf(x.c[i]);
+        Leaf z {};
+        int zPos = allocatePos();
+        // move last blockingFactor / 2 records to z
+        int m = (blockingFactor + 1) / 2;
+        for (int j = 0; j + m < blockingFactor; ++j)
+            z.records[j] = y.records[j + m];
+        // update y's size & next
+        y.n = m;
+        y.next = zPos;
+        // update z's size
+        z.n = blockingFactor - m;
 
-    }
+        // shift x's keys right
+        for (int j = x.n; j > i; --j)
+            x.k[j] = x.k[j - 1];
+        // shift x's children right
+        for (int j = x.n; j > i; --j)
+            x.c[j + 1] = x.c[j];
+        // insert key into x
+        x.k[i] = getKey(z.records[0]);
+        // insert z as child into x
+        x.c[i + 1] = zPos;
+        // update x's size
+        x.n += 1;
+        // persistence
+        setNode(x, pos);
+        setLeaf(y, x.c[i]);
+        setLeaf(z, x.c[i + 1]);
 
-    bool _insertNonFull(Node x, int i) {
-
+        return x;
     }
 
     void _splitRoot() {
-        Node s;
-        _splitChild(s, 0);
+        Node s {};
+        s.leaf = false;
+        s.c[0] = root;
+        root = allocatePos();
+        _splitChild(s, root, 0);
+    }
+
+    bool _insertNonFullLeaf(Leaf x, int pos, Key key, Record& record) {
+        int match {};
+        for (int k = 0; k < x.n; k >>= 1)
+            while (match + k < x.n && getKey(x.records[match + k]) <= key) match += k;
+        if (getKey(x.records[match]) == key) return false;
+
+        x.records[x.n] = record;
+        ++x.n;
+        sort(x.records, x.records + x.n, recordCmp);
+
+        setLeaf(x, pos);
+
+        return true;
+    }
+
+    bool _insertNonFull(Node x, int pos, Key key, Record& record) {
+        // find child to insert into
+        int i {};
+        for (; i < x.n; ++i)
+            if (x.k[i] > key) break;
+
+        if (x.leaf) {
+            Leaf child = getLeaf(x.c[i]);
+            if (child.n == blockingFactor) {
+                x = _splitLeafChild(x, pos, i);
+                if (x.k[i] <= key) ++i;
+                child = getLeaf(x.c[i]);
+            }
+            return _insertNonFullLeaf(child, x.c[i], key);
+        }
+        else {
+            Node child = getNode(x.c[i]);
+            if (child.n == (t<<1)) {
+                x = _splitChild(x, pos, i);
+                if (x.k[i] <= key) ++i;
+                child = getNode(x.c[i]);
+            }
+            return _insertNonFull(child, x.c[i], key);
+        }
+    }
+
+    pair<Record,bool> _search(Node x, Key key) {
+
     }
 
 
 public:
-    BPlusTree() {
+    BPlusTree(const char* filename, function<Key(Record&)> getKey, function<int(Key,Key)> cmp) : getKey(getKey), cmp(cmp) {
+        strcpy(this->filename, filename);
+        recordCmp = [&](Record& r1, Record& r2)->bool{ return cmp(getKey(r1), getKey(r2)) == -1; };
 
+        fstream f (filename, ios::in | ios::out | ios::binary);
+        bool exists = f.is_open();
+        f.close();
+
+        if (exists) getHeader();
+        else {
+            setHeader();
+            Node r {};
+            setNode(r, root);
+        }
     }
+
     ~BPlusTree() = default;
+
     pair<Record,bool> search(Key key) {
 
     }
-    bool insert(Record record) {
 
+    bool insert(Record record) {
+        Key key = getKey(record);
+
+        // if root has no keys, create key and leaf + add record
+        Node r = getNode(root);
+        if (r.n == 0) {
+            int lPos = allocatePos();
+            int rPos = allocatePos();
+            if (rPos == lPos) ++rPos;
+            Leaf leftChild {};
+            Leaf rightChild (1);
+            rightChild.records[0] = record;
+
+            r.k[0] = key;
+            r.c[0] = lPos;
+            r.c[1] = rPos;
+
+            setNode(r, root);
+            setLeaf(leftChild, lPos);
+            setLeaf(rightChild, rPos);
+
+            return true;
+        }
+
+        // split root if full
+        if (r.n == (t<<1) - 1) {
+            _splitRoot();
+            r = getNode(root);
+        }
+
+        return _insertNonFull(r, root, key);
     }
+
     bool remove(Key key) {
 
     }
+
     vector<Record> range(Key left, Key right) {
 
     }

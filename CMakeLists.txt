@@ -3,4 +3,6 @@ project(db2_bplustree)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(db2_bplustree main.cpp)
+add_executable(db2_bplustree main.cpp
+        BPlusTree.h
+        Student.h)
