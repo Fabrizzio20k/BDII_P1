@@ -179,11 +179,12 @@ class BPlusTree {
         int m = (blockingFactor + 1) / 2;
         for (int j = 0; j + m < blockingFactor; ++j)
             z.records[j] = y.records[j + m];
+        // update z's size
+        z.n = blockingFactor - m;
+        z.next = y.next;
         // update y's size & next
         y.n = m;
         y.next = zPos;
-        // update z's size
-        z.n = blockingFactor - m;
 
         // shift x's keys right
         for (int j = x.n; j > i; --j)
@@ -211,6 +212,7 @@ class BPlusTree {
         s.c[0] = root;
         root = allocatePos();
         setNode(s, root);
+        setHeader();
         _splitChild(s, root, 0);
     }
 

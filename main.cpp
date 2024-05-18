@@ -28,6 +28,10 @@ void testInsert(vector<Student>& students) {
     size_t n = size(students);
     for (; i < n; ++i) {
         btree.insert(students[i]);
+//        if (!btree.search(students[i].getId()).second) {
+//            cout << students[i].getId() << '\n';
+//            break;
+//        }
     }
 }
 
@@ -35,12 +39,12 @@ void testSearch(vector<Student>& students) {
     BPlusTree<Student,int,sizeof(int)> btree (filename, getKey, cmp);
 
     for (auto student: students) {
+        cout << student.getId() << '\n';
         assert(btree.search(student.getId()).second);
     }
     assert(!btree.search(0).second);
     assert(!btree.search(15).second);
     assert(!btree.search(18).second);
-    assert(!btree.search(21).second);
 }
 
 int main() {
@@ -57,7 +61,13 @@ int main() {
             {6, "Leo", "Vega", "ARQ", 2, 1350.45}
     };
 
-//    testInsert(students);
+    for (int i = 0; i < 200; ++i) {
+        string surname = "surname" + to_string(i);
+        string lastname = "lastname" + to_string(i);
+        students.emplace_back(i + 21, surname.c_str(), lastname.c_str(), "CSC", 9, 3500);
+    }
+
+    testInsert(students);
     testSearch(students);
 
     return 0;
