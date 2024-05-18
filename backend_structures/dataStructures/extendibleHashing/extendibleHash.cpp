@@ -10,7 +10,6 @@ const int MAX_DEPTH = 3;
 
 struct Record {
 	int key;
-//	string value;
 };
 
 struct Bucket {
