@@ -10,9 +10,9 @@
 #define ll long long
 using namespace std;
 
-const long block_factor = 20;
+const long block_factor = 3;
 
-const long D = 8;
+const long D = 3;
 
 template <typename TK>
 struct Bucket
@@ -333,7 +333,7 @@ private:
         }
     }
 
-    Record<TK> search(int key, fstream &filemeta, fstream &filedir, fstream &filebucket)
+    Record<TK> search(ll key, fstream &filemeta, fstream &filedir, fstream &filebucket)
     {
         int binary_index = getDirectoryIndex(key);
         this->directories = read_directories(filedir);
@@ -372,11 +372,28 @@ public:
         file.close();
     }
 
-    static void delete_files()
+    void clear()
     {
         remove("metadata.dat");
         remove("directory.dat");
         remove("bucket.dat");
+
+        this->global_depth = 1;
+        this->directories.resize(2, -1);
+
+        create_file_if_not_exist(metadata_file);
+        create_file_if_not_exist(directory_file);
+        create_file_if_not_exist(bucket_file);
+
+        fstream file_meta(metadata_file, ios::in | ios::out | ios::binary);
+        fstream filedir(directory_file, ios::in | ios::out | ios::binary);
+
+        write_metadata(file_meta);
+        write_directories(filedir);
+
+        file_meta.close();
+        filedir.close();
+
     }
 
     ExtendibleHash()
@@ -423,7 +440,7 @@ public:
         filebucket.close();
     }
 
-    Record<TK> search(int key)
+    Record<TK> search(ll key)
     {
         fstream filemeta(this->metadata_file, ios::in | ios::out | ios::binary);
         fstream filedir(this->directory_file, ios::in | ios::out | ios::binary);

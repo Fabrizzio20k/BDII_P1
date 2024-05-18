@@ -7,6 +7,7 @@
 #include <iostream>
 #include "avlfile.cpp"
 #include "appleRecord.h"
+#include "extendibleHashOficial.h"
 #include <cstring>
 #include <string>
 
@@ -23,6 +24,7 @@ public:
 private:
     crow::App<crow::CORSHandler> app;
     AVLFile<ll> avlfile = AVLFile<ll>("data.dat");
+    ExtendibleHash<ll> eh = ExtendibleHash<ll>();
     bool isCreated = false;
     string tableName;
     string columnIndex;
@@ -85,41 +87,51 @@ inline Api::Api() {
             return crow::response(response);
         }
 
+        string path = __FILE__;
+        path = path.substr(0, path.find_last_of("\\/"));
+        path = path.substr(0, path.find_last_of("\\/"));
+        path = path + "/dataStructures/dbs/AppleStore.csv";
+
+        ifstream file(path);
+        if (!file.is_open()) {
+            cerr << "No se pudo abrir el archivo" << endl;
+        }
+
+        Record<ll> record;
+        vector<Record<ll>> recs;
+
+        string line;
+        getline(file, line);
+
+        while (file >> record && file.peek() != EOF) {
+            recs.push_back(record);
+        }
+        file.close();
+
         if (data["index"] == "ISAM") {
             indexType = "ISAM";
             cout << "Creating ISAM index" << endl;
         }
         else if (data["index"] == "HASH") {
             indexType = "HASH";
-            cout << "Creating HASH index" << endl;
+            eh.clear();
+            for (const auto & rec : recs) {
+                eh.insert(rec);
+            }
+            records = eh.get_all();
         }
         else
         {
             indexType = "AVL";
-            string path = __FILE__;
-            path = path.substr(0, path.find_last_of("\\/"));
-            path = path.substr(0, path.find_last_of("\\/"));
-            path = path + "/dataStructures/dbs/AppleStore.csv";
-
-            ifstream file(path);
-
             avlfile.clear();
-
-            if (!file.is_open()) {
-                cerr << "No se pudo abrir el archivo" << endl;
+            for (const auto & rec : recs) {
+                avlfile.insert(rec);
             }
-
-            Record<ll> record;
-
-            string line;
-            getline(file, line);
-
-            while (file >> record && file.peek() != EOF) {
-                avlfile.insert(record);
-            }
-            file.close();
+            records = avlfile.inorder();
         }
-        records = avlfile.inorder();
+
+        cout << "Total records: " << records.size() << endl;
+
         isCreated = true;
         tableName = string{data["table_name"]};
         columnIndex = string{data["column_index"]};
@@ -184,7 +196,14 @@ inline Api::Api() {
             //search ISAM
         }
         else if (indexType == "HASH") {
-            //search HASH
+            Record<ll> record = eh.search(searchOne);
+            if(record.id == 0) {
+                crow::json::wvalue response;
+                response["status"] = "error";
+                response["message"] = "Record not found";
+                return crow::response(response);
+            }
+            records.push_back(record);
         }
         else {
             records = avlfile.rangeSearch(searchOne, searchOne);
@@ -346,7 +365,8 @@ inline Api::Api() {
             //insert ISAM
         }
         else if (indexType == "HASH") {
-            //insert HASH
+            eh.insert(record);
+            records = eh.get_all();
         }
         else {
             avlfile.insert(record);
@@ -356,7 +376,7 @@ inline Api::Api() {
         crow::json::wvalue response;
         response["status"] = "success";
         response["message"] = "Record inserted successfully";
-        response["id"] = avlfile.search(record.id)[0].id;
+        response["id"] = record.id;
         for (int i = 0; i < records.size(); i++) {
             response["records"][i]["id"] = records[i].id;
             response["records"][i]["track_name"] = records[i].track_name;
@@ -455,7 +475,7 @@ inline Api::Api() {
             // get all ISAM
         }
         else if (indexType == "HASH") {
-            // get all HASH
+            records = eh.get_all();
         }
         else
         {
