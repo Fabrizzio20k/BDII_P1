@@ -1,3 +1,4 @@
+/*
 #include <iostream>
 #include <vector>
 #include <bitset>
@@ -62,9 +63,9 @@ public:
 		return lsb_k;
 	}
 
-	/*
+
 	Obtains a Record and inserts it into the corresponding Bucket
-	*/
+
 	void insertRecord(Record record){
 		int directory_index  = getDirectoryIndex(record.key);
 		auto bucket = directories[directory_index].bucket;
@@ -127,3 +128,4 @@ int main(){
 
 	return 0;
 }
++/

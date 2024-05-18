@@ -26,5 +26,6 @@ set(CMAKE_CXX_STANDARD 20)
 #endif()
 
 
-add_executable(Hash dataStructures/extendibleHashing/extendibleHash.cpp)
+add_executable(Hash dataStructures/extendibleHashing/extendibleHash.cpp
+        dataStructures/extendibleHashing/extendible.h)
 #add_executable(avl experiments/avlExperiment.cpp)
