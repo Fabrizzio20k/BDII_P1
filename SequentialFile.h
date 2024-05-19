@@ -345,7 +345,25 @@ public:
     }
 
     vector<T> range(Key left, Key right) {
-        return vector<T>{};
+        auto [record, pos] = _search(left);
+
+        if (pos == 0 || cmp(getKey(record.data), left) < 0) {
+            pos = start;
+            record = getRecord(start);
+            while (pos) {
+                if (cmp(getKey(record.data), left) >= 0) break;
+                pos = record.next;
+            }
+        }
+
+        vector<T> result;
+        while (pos) {
+            if (cmp(getKey(record.data), right) == 1) break;
+            result.push_back(record.data);
+            pos = record.next;
+            record = getRecord(pos);
+        }
+        return result;
     }
 
     void print() {
