@@ -1,7 +1,3 @@
-//
-// Created by iansg on 5/18/2024.
-//
-
 #ifndef APPLE_RECORD_H
 #define APPLE_RECORD_H
 
@@ -13,7 +9,7 @@
 using namespace std;
 
 template <typename TK>
-struct AppleRecord
+struct Record
 {
     TK id;
     char track_name[230]{};
@@ -35,7 +31,7 @@ struct AppleRecord
     int right = -1;
     int height = 0;
 
-    friend istream &operator>>(istream &str, AppleRecord &data)
+    friend istream &operator>>(istream &str, Record &data)
     {
         string line;
         getline(str, line);
