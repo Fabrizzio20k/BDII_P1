@@ -37,8 +37,8 @@ class BPlusTree {
 
     class Node {
         int n {};
-        Key k[(t << 1) - 1];
-        int c[(t << 1)];
+        Key k[(t << 1) - 1] {};
+        int c[(t << 1)] {};
         bool leaf {true};
         friend BPlusTree;
     public:
@@ -326,7 +326,7 @@ class BPlusTree {
             child.n += 1;
             rightChild.n -= 1;
 
-            x.k[i] = rightChild.records[0];
+            x.k[i] = getKey(rightChild.records[0]);
 
             setNode(x, pos);
             setLeaf(rightChild, x.c[i + 1]);
@@ -387,7 +387,7 @@ class BPlusTree {
 
             leftChild.k[leftChild.n] = x.k[i];
             for (int j = 1; j <= child.n; ++j)
-                leftChild.k[j + leftChild.n] = child[j - 1];
+                leftChild.k[j + leftChild.n] = child.k[j - 1];
 
             for (int j = 1; j <= child.n + 1; ++j)
                 leftChild.c[j + leftChild.n] = child.c[j - 1];
@@ -440,8 +440,8 @@ class BPlusTree {
             child = getLeaf(x.c[i]);
 
             auto p = _removeFromLeaf(child, x.c[i], key);
-            replacement = p.fi;
-            wasRemoved = p.se;
+            replacement = p.first;
+            wasRemoved = p.second;
         }
         else {
             m = t - 1;
@@ -463,8 +463,8 @@ class BPlusTree {
             child = getNode(x.c[i]);
 
             auto p = _remove(child, x.c[i], key);
-            replacement = p.fi;
-            wasRemoved = p.se;
+            replacement = p.first;
+            wasRemoved = p.second;
         }
 
         if (wasRemoved && i > 0 && x.k[i - 1] == key) {
@@ -540,7 +540,7 @@ public:
 
         // if root has no keys, create key and leaf + add record
         Node r = getNode(root);
-        if (r.c[0] == 0) {
+        if (r.c[0] == 0 && r.c[1] == 0) {
             int lPos = allocatePos();
             int rPos = allocatePos();
             if (rPos == lPos) ++rPos;

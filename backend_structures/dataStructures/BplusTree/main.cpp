@@ -21,11 +21,12 @@ void testInsert(vector<Student>& students) {
     students.emplace_back(19, "Lyzbeth", "Shinozaki", "PSI", 4, 1020.80);
 
     for (auto student: students) {
+//        if (student.getId() < 95) continue;
         btree.insert(student);
-//        if (student.getId() >= 42 && !btree.search(42).second) {
-//            cout << student.getId() << '\n';
-//            break;
-//        }
+        if (student.getId() >= 63 && !btree.search(63).second) {
+            cout << student.getId() << '\n';
+            break;
+        }
     }
 }
 
@@ -33,6 +34,7 @@ void testSearch(vector<Student>& students) {
     BPlusTree<Student,int,sizeof(int)> btree (filename, getKey, cmp);
 
     for (auto student: students) {
+//        cout << student.getId() << '\n';
         assert(btree.search(student.getId()).second);
     }
     assert(!btree.search(0).second);
@@ -59,6 +61,12 @@ void testRange() {
         cout << s;
 }
 
+void testDelete(vector<Student>& students) {
+    BPlusTree<Student,int,sizeof(int)> btree (filename, getKey, cmp);
+    for (int i = 0; i < 5; ++i)
+        cout << boolalpha << btree.remove(students[i].getId()) << '\n';
+}
+
 int main() {
     vector<Student> students = {
             {8, "Tito", "Luna", "IND", 4, 1550.20},
@@ -81,7 +89,9 @@ int main() {
 
 //    testInsert(students);
 //    testInsert2();
-    testSearch(students);
+//    testSearch(students);
+    testRange();
+    testDelete(students);
     testRange();
 
     return 0;
