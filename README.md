@@ -19,8 +19,8 @@
     - [Ejemplos de Secuencias SQL](#ejemplos-de-secuencias-sql)
     - [Justificación de uso](#justificación-de-uso)
   - [Análisis comparativo](#análisis-comparativo)
-    - [Métricas del AVL](#metricas-de-avlfile)
-      - [Resultados experimentales](#resultados-experimentales-avfile)
+    - [Métricas del AVL](#métricas-de-avlfile)
+      - [Resultados experimentales_AVL](#resultados-experimentales-avlfile)
   - [Pruebas de uso y presentación](#pruebas-de-uso-y-presentación)
     - [Interfaz gráfica](#interfaz-gráfica)
     - [Demostración de funcionalidades](#demostración-de-funcionalidades)
@@ -180,13 +180,20 @@ Para el análisis comparativo se utilizaron datos falsos generados con la estruc
 
 #### Resultados experimentales AVLFile
 
-
 [//]: # (Discusión de los resultados experimentales )
+
+Se aprecia una clara tendencia del aumento del tiempo de ejecución para cada uno de los volúmenes de datos. Además, se aprecia un aumento drástico en los accesos a memoria secundaria, ya que el árbol AVL necesita acceder a cada nodo para realizar los balanceos correspondientes.
+
+### Métricas de Extendible Hash File
+
+### Métricas de B+ Tree File
 
 ## Pruebas de uso y presentación
 ### Interfaz gráfica
+Para la interfaz gráfica se utilizó un cliente frontend en Nextjs y un servidor backend en C++ para consumir la API.
 
-
+[//]: # (Link al backend en la nube)
+[//]: # ([Google]&#40;https://www.google.com&#41;)
 
 [//]: # (Link al frontend en la nube)
 [//]: # ([Google]&#40;https://www.google.com&#41;)
@@ -195,6 +202,11 @@ Para el análisis comparativo se utilizaron datos falsos generados con la estruc
 
 [//]: # (Link de youtube a la grabación )
 [//]: # ([Google]&#40;https://www.google.com&#41;)
+
+Video demostrativo de la interfaz gráfica y las funcionalidades implementadas en el proyecto:
+
+[Video demostrativo](https://drive.google.com/drive/folders/1yk9vzw-FVsc_uhK1Ozv-Rt6sOZW_Q-6y?usp=sharing)
+
 
 ## Autores
 
