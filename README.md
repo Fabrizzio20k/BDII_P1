@@ -169,13 +169,17 @@ El uso de expresiones regulares en la implementación de un parser SQL es una pr
 
 ## Análisis comparativo
 
+Para el análisis comparativo se utilizaron datos falsos generados con la estructura de registro de la base de datos de aplicaciones móviles. Se realizaron pruebas de inserción, búsqueda y eliminación de registros en cada una de las técnicas de organización de archivos implementadas: AVL File, B+ Tree File y Extendible Hash File con 1000, 10000, 100000 y 1000000 de datos.
+
 [//]: # (Gráficas, considerar dos métricas: total de accesos a disco duro {read & write} y tiempo de ejecución en milisegundos) 
 
-### Inserción
-### Búsqueda
-### Eliminación
+### AVL File
+|**Búsqueda única**|            **Búsqueda por Rango**            |                 **Inserción**                  |                **Eliminación**                 |
+|:------------:|:--------------------------------------------:|:----------------------------------------------:|:----------------------------------------------:|
+|![AVLUniqueSearch](assets/AVLUniqueSearch.png)| ![AVLRangeSearch](assets/AVLRangeSearch.png)| ![AVLInsertRecord](assets/AVLInsertRecord.png) | ![AVLDeleteRecord](assets/AVLDeleteRecord.png) |
 
-### Resultados experimentales
+#### Resultados experimentales
+
 
 [//]: # (Discusión de los resultados experimentales )
 
