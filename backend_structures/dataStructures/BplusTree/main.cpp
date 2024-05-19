@@ -51,6 +51,14 @@ void testInsert2() {
     }
 }
 
+void testRange() {
+    BPlusTree<Student,int,sizeof(int)> btree (filename, getKey, cmp);
+
+    auto result = btree.range(0, 20);
+    for (auto& s : result)
+        cout << s;
+}
+
 int main() {
     vector<Student> students = {
             {8, "Tito", "Luna", "IND", 4, 1550.20},
@@ -74,6 +82,7 @@ int main() {
 //    testInsert(students);
 //    testInsert2();
     testSearch(students);
+    testRange();
 
     return 0;
 }

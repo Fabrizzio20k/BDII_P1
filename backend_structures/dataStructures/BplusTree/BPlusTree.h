@@ -21,7 +21,7 @@ class BPlusTree {
     // t * 2 * (sizeof(int) + sizeof(Key)) = blockSize - sizeof(int) - sizeof(bool) - sizeof(Key)
     // t = (blockSize - sizeof(bool) - sizeof(int) - sizeof(Key) / (2 * (sizeof(int) + sizeof(Key))
     static const int t { // t = minimum degree
-        (blockSize - sizeof(bool) - sizeof(int) - keySize) / (2 * (sizeof(int) + keySize))
+            (blockSize - sizeof(bool) - sizeof(int) - keySize) / (2 * (sizeof(int) + keySize))
     };
     static const int blockingFactor = (blockSize - 3 * sizeof(int)) / sizeof(Record);
 
@@ -356,25 +356,25 @@ class BPlusTree {
 
     void mergeWithLeft(Node& x, int pos, int i) {
         if (x.leaf) {
-           Leaf child = getLeaf(x.c[i]);
-           Leaf leftChild = getLeaf(x.c[i - 1]);
+            Leaf child = getLeaf(x.c[i]);
+            Leaf leftChild = getLeaf(x.c[i - 1]);
 
-           for (int j = 0; j < child.n; ++j)
-               leftChild.records[j + leftChild.n] = child.records[j];
+            for (int j = 0; j < child.n; ++j)
+                leftChild.records[j + leftChild.n] = child.records[j];
 
             Leaf del {};
             del.nextDel = lastDel;
             lastDel = x.c[i];
 
-           for (int j = i; j < x.n; ++j)
-               x.k[i - 1] = x.k[i];
+            for (int j = i; j < x.n; ++j)
+                x.k[i - 1] = x.k[i];
 
-           for (int j = i + 1; j <= x.n; ++j)
-               x.c[j - 1] = x.c[j];
+            for (int j = i + 1; j <= x.n; ++j)
+                x.c[j - 1] = x.c[j];
 
-           x.n -= 1;
-           leftChild.n += child.n;
-           leftChild.next = child.next;
+            x.n -= 1;
+            leftChild.n += child.n;
+            leftChild.next = child.next;
 
             setNode(x, pos);
             setLeaf(leftChild, x.c[i - 1]);
@@ -583,15 +583,16 @@ public:
 
         int i = 0;
         for (; i < x.n; ++i)
-            if (x.records[i] >= left) break;
+            if (getKey(x.records[i]) >= left) break;
 
         vector<Record> result;
         while (pos) {
             for (; i < x.n; ++i)
-                if (x.records[i] > right) return result;
+                if (getKey(x.records[i]) > right) return result;
                 else result.push_back(x.records[i]);
             pos = x.next;
             x = getLeaf(pos);
+            i = 0;
         }
         return result;
     }
