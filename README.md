@@ -205,7 +205,7 @@ Para la interfaz gráfica se utilizó un cliente frontend en Nextjs y un servido
 
 Video demostrativo de la interfaz gráfica y las funcionalidades implementadas en el proyecto:
 
-[Video demostrativo](https://drive.google.com/drive/folders/1yk9vzw-FVsc_uhK1Ozv-Rt6sOZW_Q-6y?usp=sharing)
+[Video demostrativo](https://drive.google.com/drive/folders/1SJPWjXRUiz1XNXENajDV5FHBQPZN4u52?usp=drive_link)
 
 
 ## Autores

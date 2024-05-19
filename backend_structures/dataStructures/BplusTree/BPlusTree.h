@@ -72,7 +72,6 @@ class BPlusTree {
         else {
             fstream f (filename, ios::in | ios::out | ios::binary);
             f.seekg(0,ios::end);
-            int fuckyou = f.tellg();
             pos = getLastPos(f.tellg());
             f.close();
             return pos;
