@@ -50,3 +50,10 @@ cmake-build-debug/
 
 .vscode/*
 .vscode
+
+backend_structures/experiments/test_1000.csv
+backend_structures/experiments/test_10000.csv
+backend_structures/experiments/test_100000.csv
+backend_structures/experiments/test_1000000.csv
+
+

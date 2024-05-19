@@ -6,7 +6,8 @@
 #include <string>
 #include <fstream>
 #include <iomanip>
-#include "exampleRecord.h"
+#include "appleRecord.h"
+//#include "exampleRecord.h"
 
 using namespace std;
 
@@ -95,7 +96,7 @@ public:
 		cout << "Root: " << pos << endl;
 
 		int count = 0;
-		while (file.read((char *) (&record), sizeof(Record<TK>)))
+		while (file.read((char *) (&record), sizeof(Record<TK>)) && count < 100 )
 			cout << count++ << ": " << record.id << " | " << record.left << " | " << record.right << " | " << record.height << endl;
 
 		file.close();
@@ -140,8 +141,9 @@ private:
 			search(records, record.right, key, file);
 		else {
 			records.push_back(record);
-			search(records, record.left, key, file);
-			search(records, record.right, key, file);
+			return;
+//			search(records, record.left, key, file);
+//			search(records, record.right, key, file);
 		}
 	}
 
