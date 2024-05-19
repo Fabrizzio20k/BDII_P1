@@ -1,7 +1,3 @@
-//
-// Created by iansg on 5/18/2024.
-//
-
 #include "appleRecord.h"
 #include "BPlusTree.h"
 #include <chrono>
@@ -20,9 +16,9 @@ auto cmp = [](ll k1, ll k2) -> ll
     return 0;
 };
 
-auto getKey = [](AppleRecord<ll> &s)
+auto getKey = [](Record<ll> &s)
 { return s.id; };
-vector<AppleRecord<ll>> readAndInsertData(string filename)
+vector<Record<ll>> readAndInsertData(string filename)
 {
     ifstream file(filename);
 
@@ -32,15 +28,15 @@ vector<AppleRecord<ll>> readAndInsertData(string filename)
         return {};
     }
 
-    vector<AppleRecord<ll>> records;
-    AppleRecord<ll> record;
+    vector<Record<ll>> records;
+    Record<ll> record;
 
     // skip the first line
     string line;
     getline(file, line);
 
     remove("bplustree.bin");
-    BPlusTree<AppleRecord<ll>, ll, sizeof(ll)> btree("bplustree.bin", getKey, cmp);
+    BPlusTree<Record<ll>, ll, sizeof(ll)> btree("bplustree.bin", getKey, cmp);
 
     auto start = std::chrono::high_resolution_clock::now();
     while (file >> record && file.peek() != EOF)
@@ -61,5 +57,5 @@ vector<AppleRecord<ll>> readAndInsertData(string filename)
 
 int main()
 {
-    vector<AppleRecord<ll>> records = readAndInsertData("AppleStore.csv");
+    vector<Record<ll>> records = readAndInsertData("AppleStore.csv");
 }
