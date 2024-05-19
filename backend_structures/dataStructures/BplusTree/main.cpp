@@ -23,11 +23,14 @@ void testInsert(vector<Student>& students) {
     for (auto student: students) {
 //        if (student.getId() < 95) continue;
         btree.insert(student);
-        if (student.getId() >= 63 && !btree.search(63).second) {
-            cout << student.getId() << '\n';
-            break;
-        }
+//        if (student.getId() >= 63 && !btree.search(63).second) {
+//            cout << student.getId() << '\n';
+//            break;
+//        }
     }
+
+    auto res = btree.getAll();
+    cout << size(res) << '\n';
 }
 
 void testSearch(vector<Student>& students) {
@@ -87,12 +90,12 @@ int main() {
         students.emplace_back(i + 21, surname.c_str(), lastname.c_str(), "CSC", 9, 3500);
     }
 
-//    testInsert(students);
+    testInsert(students);
 //    testInsert2();
 //    testSearch(students);
-    testRange();
-    testDelete(students);
-    testRange();
+//    testRange();
+//    testDelete(students);
+//    testRange();
 
     return 0;
 }

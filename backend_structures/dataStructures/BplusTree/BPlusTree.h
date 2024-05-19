@@ -15,7 +15,7 @@ using namespace std;
 // clustered B+ tree
 template<typename Record, typename Key, int keySize>
 class BPlusTree {
-    static const int blockSize = (1<<8); // block size in bytes
+    static const int blockSize = (1<<12); // block size in bytes
 
     // t * 2 * sizeof(int) + (t * 2 - 1) * sizeof(Key) + sizeof(int) + sizeof(bool) <= blockSize
     // t * 2 * (sizeof(int) + sizeof(Key)) = blockSize - sizeof(int) - sizeof(bool) - sizeof(Key)
@@ -593,6 +593,24 @@ public:
             pos = x.next;
             x = getLeaf(pos);
             i = 0;
+        }
+        return result;
+    }
+
+    vector<Record> getAll() {
+        Node x = getNode(root);
+        while (!x.leaf) {
+            x = getNode(x.c[0]);
+        }
+
+        int pos = x.c[0];
+        Leaf cur = getLeaf(pos);
+        vector<Record> result;
+        while (pos) {
+            for (int i = 0; i < cur.n; ++i)
+                result.push_back(cur.records[i]);
+            pos = cur.next;
+            cur = getLeaf(pos);
         }
         return result;
     }

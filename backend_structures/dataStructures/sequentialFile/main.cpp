@@ -20,6 +20,9 @@ void testInsert(vector<Student>& students) {
         sf.insert(student);
         sf.print();
     }
+
+    auto res = sf.getAll();
+    assert(size(res) == 13);
 }
 
 void testSearch(vector<Student>& students) {
@@ -52,7 +55,7 @@ void testDelete(vector<Student> students) {
     for (size_t i = 0; i*2 < n; ++i)
         assert(!sf.remove(students[i].getCode()));
 
-    for (size_t i = n/2; i < n; ++i)
+    for (size_t i = (n+1)/2; i < n; ++i)
         assert(sf.search(students[i].getCode()).second);
 }
 
@@ -69,7 +72,8 @@ int main() {
             {"A008", "Tito", "Luna", "IND", 4, 1550.20},
             {"A004", "Juan", "Diaz", "MED", 4, 1400.25},
             {"A000", "Lyzbeth", "Shinozaki", "PSI", 4, 1020.80},
-            {"A012", "Sachi", "Yui", "INF", 5, 2000.80}
+            {"A012", "Sachi", "Yui", "INF", 5, 2000.80},
+            {"A011", "Leafa", "Yui", "INF", 5, 2000.80}
     };
 
     testInsert(students); // comment for second run to test persistence

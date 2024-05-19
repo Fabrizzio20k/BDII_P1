@@ -366,6 +366,18 @@ public:
         return result;
     }
 
+    vector<T> getAll() {
+        int pos = start;
+        Record cur = getRecord(start);
+        vector<T> result;
+        while (pos) {
+            result.push_back(cur.data);
+            pos = cur.next;
+            cur = getRecord(pos);
+        }
+        return result;
+    }
+
     void print() {
         Record record {};
         cout << "=========MAIN SPACE============\n";
