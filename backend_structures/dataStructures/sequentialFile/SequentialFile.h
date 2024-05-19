@@ -24,7 +24,7 @@ class SequentialFile {
         explicit Record(T& data) : data(data) {}
     };
 
-    static const int blockSize = (1<<8); // block size in bytes
+    static const int blockSize = (1<<12); // block size in bytes
     static const int blockingFactor = blockSize / sizeof(Record);
 
     int N {blockingFactor}; // number of records in first block to manage in memory
