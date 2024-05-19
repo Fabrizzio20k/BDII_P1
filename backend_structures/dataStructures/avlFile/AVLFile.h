@@ -9,6 +9,7 @@
 #include "appleRecord.h"
 
 using namespace std;
+
 //
 // template<typename TK>
 // struct Record {
@@ -131,9 +132,8 @@ public:
 		cout << "Root: " << pos << endl;
 
 		int count = 0;
-		while (file.read((char *)(&record), sizeof(Record<TK>)))
-			//			cout << count++ << ": " << record.id << " | " << record.nombre << " | " << record.ciclo << " | "
-			//				 << record.left << " | " << record.right << " | " << record.height << endl;
+
+		while (file.read((char *) (&record), sizeof(Record<TK>)))
 			cout << count++ << ": " << record.id << " | " << record.left << " | " << record.right << " | " << record.height << endl;
 
 		file.close();
@@ -601,7 +601,6 @@ private:
 			return;
 
 		int h = balancingFactor(pos_node, file);
-		//		int l = -1, r = -1;
 
 		if (h > 1)
 			left_rotate(parent, pos_node, file);

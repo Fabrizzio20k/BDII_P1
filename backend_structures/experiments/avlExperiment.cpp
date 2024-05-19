@@ -2,7 +2,9 @@
 #include <chrono>
 #include <string>
 #include <cstring>
-#include "avlfile.cpp"
+#include <random>
+//#include "AVLFile.h"
+#include "AVLFileMetrics.h"
 //#include "appleRecord.h"
 
 using namespace std;
@@ -10,55 +12,50 @@ using namespace std::chrono;
 
 #define ll long long
 
-void loadAppleData(AVLFile<ll> &avlfile){
-	string path = __FILE__;
-	path = path.substr(0, path.find_last_of("\\/"));
-	path = path.substr(0, path.find_last_of("\\/"));
-	path = path + "/dataStructures/dbs/AppleStore.csv";
-
-	ifstream file(path);
-
-	avlfile.clear();
-
-	if (!file.is_open()){
-		cerr << "No se pudo abrir el archivo" << endl;
-	}
-
-	Record<ll> record;
-
-	string line;
-	getline(file, line);
-
-	int i = 0;
-	while (file >> record && file.peek() != EOF){
-		avlfile.insert(record);
- 		i++;
- 	}
-
-	cout << "Total records read: " << i << endl;
-
-//	for (const auto &r : records){
-//		cout << r.id << " " << r.prime_genre << endl;
+//void loadAppleData(AVLFile<ll> &avlfile){
+//	string path = __FILE__;
+//	path = path.substr(0, path.find_last_of("\\/"));
+//	path = path.substr(0, path.find_last_of("\\/"));
+//	path = path + "/dataStructures/dbs/AppleStore.csv";
+//
+//	ifstream file(path);
+//
+//	avlfile.clear();
+//
+//	if (!file.is_open()){
+//		cerr << "No se pudo abrir el archivo" << endl;
 //	}
 //
-	file.close();
-}
-
-//void fulfill(AVLFile<ll> &file, ll beg, ll dataSize) {
-//	file.clear();
+//	Record<ll> record;
 //
-//	for (ll i = beg; i < dataSize; i++) {
-//		Record<ll> r;
+//	string line;
+//	getline(file, line);
 //
-//		string name = "Name" + to_string(i);
+//	int i = 0;
+//	while (file >> record && file.peek() != EOF){
+//		avlfile.insert(record);
+// 		i++;
+// 	}
 //
-//		r.id = i;
-//		strncpy(r.nombre, name.c_str(), 12);
-//		r.ciclo = 1;
+//	cout << "Total records read: " << i << endl;
 //
-//		file.insert(r);
-//	}
+////	for (const auto &r : records){
+////		cout << r.id << " " << r.prime_genre << endl;
+////	}
+////
+//	file.close();
 //}
+
+void fulfill(AVLFile<ll> &file, ll beg, ll dataSize) {
+	file.clear();
+
+	for (ll i = beg; i < dataSize; i++) {
+		Record<ll> r;
+		r.id = i;
+
+		file.insert(r);
+	}
+}
 
 //void testSingleSearch(AVLFile<int> &avlfile, int key) {
 //	cout << "Busqueda de un registro" << endl;
@@ -116,26 +113,31 @@ void loadAppleData(AVLFile<ll> &avlfile){
 //	cout << "################################" << endl << endl;
 //}
 
+//int main(){
+//	AVLFile<ll> avlfile("data.dat");
+//
+//	loadAppleData(avlfile);
+//
+//	// avlfile.printAll();
+//
+//	Record<ll> r ={ 99, "YAPE FAKE APK", 1000000, "USD", 0.0, 0, 0, 0.0, 0.0, "1.0", "4+", "Finance", 38, 5, 1, 1, -1, -1, 0};
+//
+//	avlfile.insert(r);
+//	//avlfile.remove(124324423000);
+//	auto v1 = avlfile.rangeSearch(300000000, 429047995);
+//	auto v2 = avlfile.search(99);
+//
+//	cout << "Size v1: " << v1.size() << endl;
+//	cout << "Size v2: " << v2.size() << endl;
+//
+//	for (auto&i : v2) {
+//		cout << i.id;
+//	}
+//
+//	return 0;
+//}
+
 int main(){
-	AVLFile<ll> avlfile("data.dat");
-
-	loadAppleData(avlfile);
-
-	// avlfile.printAll();
-
-	Record<ll> r ={ 99, "YAPE FAKE APK", 1000000, "USD", 0.0, 0, 0, 0.0, 0.0, "1.0", "4+", "Finance", 38, 5, 1, 1, -1, -1, 0};
-
-	avlfile.insert(r);
-	//avlfile.remove(124324423000);
-	auto v1 = avlfile.rangeSearch(300000000, 429047995);
-	auto v2 = avlfile.search(99);
-
-	cout << "Size v1: " << v1.size() << endl;
-	cout << "Size v2: " << v2.size() << endl;
-
-	for (auto&i : v2) {
-		cout << i.id;
-	}
 
 	return 0;
 }

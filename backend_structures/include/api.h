@@ -5,7 +5,7 @@
 #include "crow.h"
 #include "crow/middlewares/cors.h"
 #include <iostream>
-#include "avlfile.cpp"
+#include "AVLFile.h"
 #include "appleRecord.h"
 #include "extendibleHashOficial.h"
 #include <cstring>
