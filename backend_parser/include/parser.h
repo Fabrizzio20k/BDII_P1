@@ -38,7 +38,7 @@ private:
     Command cmd;
     bool parseCommand()
     {
-        regex createRegex(R"(create table (\w+) from file \"(.+)\" using (HASH|B\+|AVL) INDEX \(\"(\w+)\"\);)");
+        regex createRegex(R"(create table (\w+) from file \"(.+)\" using (HASH|B\+|AVL|SEQUENTIAL) INDEX \(\"(\w+)\"\);)");
         regex selectRegex(R"(select \* from (\w+) where (\w+) = (.+);)");
         regex rangeRegex(R"(select \* from (\w+) where (\w+) between (.+) and (.+);)");
         regex insertRegex(R"(insert into (\w+) values \((.+)\);)");
