@@ -15,6 +15,7 @@ find_package(Crow CONFIG REQUIRED)
 
 include_directories(include dataStructures/avlFile)
 include_directories(include dataStructures/extendibleHash)
+include_directories(include dataStructures/BplusTree)
 include_directories(include dataStructures/dbs)
 
 add_executable(main src/main.cpp

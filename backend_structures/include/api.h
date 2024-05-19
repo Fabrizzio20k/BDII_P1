@@ -8,10 +8,25 @@
 #include "AVLFile.h"
 #include "appleRecord.h"
 #include "extendibleHashOficial.h"
+#include "BPlusTree.h"
 #include <cstring>
 #include <string>
 
 using namespace std;
+
+const char *filename = "bplustree.bin";
+
+auto cmp = [](ll k1, ll k2) -> ll
+{
+    if (k1 < k2)
+        return -1;
+    if (k1 > k2)
+        return 1;
+    return 0;
+};
+
+auto getKey = [](Record<ll> &s)
+{ return s.id; };
 
 class Api {
 public:
@@ -25,6 +40,8 @@ private:
     crow::App<crow::CORSHandler> app;
     AVLFile<ll> avlfile = AVLFile<ll>("data.dat");
     ExtendibleHash<ll> eh = ExtendibleHash<ll>();
+
+    BPlusTree<Record<ll>, ll, sizeof(ll)> tree = BPlusTree<Record<ll>, ll, sizeof(ll)>(filename, getKey, cmp);
     bool isCreated = false;
     string tableName;
     string columnIndex;
@@ -110,7 +127,11 @@ inline Api::Api() {
 
         if (data["index"] == "B+") {
             indexType = "B+";
-            cout << "Creating B+ index" << endl;
+            std::remove("bplustree.bin");
+            for (const auto & rec : recs) {
+                tree.insert(rec);
+            }
+            records = tree.getAll();
         }
         else if (data["index"] == "HASH") {
             indexType = "HASH";
@@ -197,7 +218,14 @@ inline Api::Api() {
         vector<Record<ll>> records;
 
         if (indexType == "B+") {
-            //search B+
+            pair<Record<ll>, bool> record = tree.search(searchOne);
+            if (!record.second) {
+                crow::json::wvalue response;
+                response["status"] = "error";
+                response["message"] = "Record not found";
+                return crow::response(response);
+            }
+            records.push_back(record.first);
         }
         else if (indexType == "SEQUENTIAL") {
             //search sequential
@@ -272,7 +300,13 @@ inline Api::Api() {
         vector<Record<ll>> records;
 
         if (indexType == "B+") {
-            //search B+
+            records = tree.range(searchOne, searchTwo);
+            if (records.empty()) {
+                crow::json::wvalue response;
+                response["status"] = "error";
+                response["message"] = "Records not found in search range";
+                return crow::response(response);
+            }
         }
         else if (indexType == "SEQUENTIAL") {
             //search sequential
@@ -372,7 +406,8 @@ inline Api::Api() {
         record.vpp_lic = data["record"]["vpp_lic"].i();
 
         if (indexType == "B+") {
-            //insert B+
+            tree.insert(record);
+            records = tree.getAll();
         }
         if (indexType == "SEQUENTIAL") {
             //insert sequential
@@ -433,7 +468,14 @@ inline Api::Api() {
         }
 
         if (indexType == "B+") {
-            //delete B+
+            bool res = tree.remove(data["id"].u());
+            if (!res) {
+                crow::json::wvalue response;
+                response["status"] = "error";
+                response["message"] = "Record not found. Cannot delete";
+                return crow::response(response);
+            }
+            records = tree.getAll();
         }
         else if (indexType == "SEQUENTIAL") {
             //delete sequential
