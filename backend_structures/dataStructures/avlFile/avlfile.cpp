@@ -6,6 +6,7 @@
 #include <string>
 #include <fstream>
 #include <iomanip>
+#include "appleRecord.h"
 
 using namespace std;
 //

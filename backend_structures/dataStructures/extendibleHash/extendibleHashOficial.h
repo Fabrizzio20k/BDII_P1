@@ -4,8 +4,7 @@
 #include <valarray>
 #include <iostream>
 #include <set>
-#include <sstream>
-#include <cstring>
+#include "appleRecord.h"
 #define ll long long
 using namespace std;
 
