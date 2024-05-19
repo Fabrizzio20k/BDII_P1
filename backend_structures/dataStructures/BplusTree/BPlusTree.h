@@ -508,7 +508,6 @@ class BPlusTree {
         }
     }
 
-
 public:
     BPlusTree(const char* filename, function<Key(Record&)> getKey, function<int(Key,Key)> cmp) : getKey(getKey), cmp(cmp) {
         strcpy(this->filename, filename);
