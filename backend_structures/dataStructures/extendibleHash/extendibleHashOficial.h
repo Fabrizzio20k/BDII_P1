@@ -18,6 +18,7 @@ struct Bucket
     Record<TK> records[block_factor];
     int sz = 0;
     long next = -1;
+    long prev = -1;
     long local_depth = 0;
 
     [[nodiscard]] bool is_full()
@@ -330,6 +331,85 @@ private:
             }
         }
     }
+    void remove(ll key, fstream &filemeta, fstream &filedir, fstream &filebucket)
+    {
+        int binary_index = getDirectoryIndex(key);
+        this->directories = read_directories(filedir);
+        Bucket<TK> bucket = read_bucket(directories[binary_index], filebucket);
+
+        while (bucket.next != -1)
+        {
+            for (int i = 0; i < bucket.sz; i++)
+            {
+                if (bucket.records[i].id == key)
+                {
+                    break;
+                }
+            }
+
+            bucket = read_bucket(bucket.next, filebucket);
+        }
+
+        bucket.remove_Record(key);
+
+        if (!bucket.is_empty())
+        {
+            long pos_bucket;
+            if (bucket.prev == -1)
+            {
+                pos_bucket = directories[binary_index];
+            }
+            else
+            {
+                Bucket<TK> prev_b = read_bucket(bucket.prev, filebucket);
+                pos_bucket = prev_b.next;
+            }
+
+            write_bucket(pos_bucket, bucket, filebucket);
+            return;
+        }
+
+        if (bucket.prev == -1 && bucket.next == -1)
+        {
+            long pos_bucket = directories[binary_index];
+
+            for (int i = 0; i < directories.size(); i++)
+            {
+                if (directories[i] == pos_bucket)
+                {
+                    directories[i] = -1;
+                }
+            }
+            write_directories(filedir);
+            return;
+        }
+
+        if (bucket.prev == -1)
+        {
+            directories[binary_index] = bucket.next;
+            write_directories(filedir);
+            return;
+        }
+
+        auto prev_bucket = read_bucket(bucket.prev, filebucket);
+
+        if (bucket.next == -1)
+        {
+            prev_bucket.next = -1;
+            write_bucket(bucket.prev, prev_bucket, filebucket);
+            write_directories(filedir);
+            return;
+        }
+
+        auto next_bucket = read_bucket(bucket.next, filebucket);
+
+        prev_bucket.next = bucket.next;
+        next_bucket.prev = bucket.prev;
+
+        write_bucket(bucket.prev, prev_bucket, filebucket);
+        write_bucket(bucket.next, next_bucket, filebucket);
+        write_directories(filedir);
+    }
 
     Record<TK> search(ll key, fstream &filemeta, fstream &filedir, fstream &filebucket)
     {
@@ -372,9 +452,9 @@ public:
 
     void clear()
     {
-        remove("metadata.dat");
-        remove("directory.dat");
-        remove("bucket.dat");
+        std::remove("metadata.dat");
+        std::remove("directory.dat");
+        std::remove("bucket.dat");
 
         this->global_depth = 1;
         this->directories.resize(2, -1);
@@ -431,6 +511,19 @@ public:
         fstream filebucket(this->bucket_file, ios::in | ios::out | ios::binary);
 
         insert(record, filemeta, filedir, filebucket);
+
+        filemeta.close();
+        filedir.close();
+        filebucket.close();
+    }
+
+    void remove(int key)
+    {
+        fstream filemeta(this->metadata_file, ios::in | ios::out | ios::binary);
+        fstream filedir(this->directory_file, ios::in | ios::out | ios::binary);
+        fstream filebucket(this->bucket_file, ios::in | ios::out | ios::binary);
+
+        remove(key, filemeta, filedir, filebucket);
 
         filemeta.close();
         filedir.close();
