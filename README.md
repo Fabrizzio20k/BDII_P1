@@ -201,4 +201,4 @@ El uso de expresiones regulares en la implementación de un parser SQL es una pr
 
 ## Referencias
 
-- Nievergelt, Y. (2015). Logic, mathematics, and computer science: modern foundations with practical applications. Springer .
+- Nievergelt, Y. (2015). Logic, mathematics, and computer science: modern foundations with practical applications. Springer.
