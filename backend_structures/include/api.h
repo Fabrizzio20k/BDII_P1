@@ -73,7 +73,7 @@ inline Api::Api() {
             return crow::response(response);
         }
 
-        if (data["index"] != "ISAM" && data["index"] != "HASH" && data["index"] != "AVL") {
+        if (data["index"] != "B+" && data["index"] != "HASH" && data["index"] != "AVL" && data["index"] != "SEQUENTIAL") {
             crow::json::wvalue response;
             response["status"] = "error";
             response["message"] = "Index type not supported";
@@ -108,9 +108,9 @@ inline Api::Api() {
         }
         file.close();
 
-        if (data["index"] == "ISAM") {
-            indexType = "ISAM";
-            cout << "Creating ISAM index" << endl;
+        if (data["index"] == "B+") {
+            indexType = "B+";
+            cout << "Creating B+ index" << endl;
         }
         else if (data["index"] == "HASH") {
             indexType = "HASH";
@@ -119,6 +119,10 @@ inline Api::Api() {
                 eh.insert(rec);
             }
             records = eh.get_all();
+        }
+        else if (data["index"] == "SEQUENTIAL") {
+            indexType = "SEQUENTIAL";
+            cout << "Creating Sequential index" << endl;
         }
         else
         {
@@ -192,8 +196,11 @@ inline Api::Api() {
 
         vector<Record<ll>> records;
 
-        if (indexType == "ISAM") {
-            //search ISAM
+        if (indexType == "B+") {
+            //search B+
+        }
+        else if (indexType == "SEQUENTIAL") {
+            //search sequential
         }
         else if (indexType == "HASH") {
             Record<ll> record = eh.search(searchOne);
@@ -264,8 +271,11 @@ inline Api::Api() {
 
         vector<Record<ll>> records;
 
-        if (indexType == "ISAM") {
-            //search ISAM
+        if (indexType == "B+") {
+            //search B+
+        }
+        else if (indexType == "SEQUENTIAL") {
+            //search sequential
         }
         else if (indexType == "HASH") {
             crow::json::wvalue response;
@@ -361,8 +371,11 @@ inline Api::Api() {
         record.lang_num = data["record"]["lang_num"].i();
         record.vpp_lic = data["record"]["vpp_lic"].i();
 
-        if (indexType == "ISAM") {
-            //insert ISAM
+        if (indexType == "B+") {
+            //insert B+
+        }
+        if (indexType == "SEQUENTIAL") {
+            //insert sequential
         }
         else if (indexType == "HASH") {
             eh.insert(record);
@@ -419,8 +432,11 @@ inline Api::Api() {
             return crow::response(response);
         }
 
-        if (indexType == "ISAM") {
-            //delete ISAM
+        if (indexType == "B+") {
+            //delete B+
+        }
+        else if (indexType == "SEQUENTIAL") {
+            //delete sequential
         }
         else if (indexType == "HASH") {
             //delete HASH
@@ -471,8 +487,11 @@ inline Api::Api() {
             return crow::response(response);
         }
 
-        if (indexType == "ISAM") {
-            // get all ISAM
+        if (indexType == "B+") {
+            // get all b+
+        }
+        if (indexType == "SEQUENTIAL") {
+            // get all sequential
         }
         else if (indexType == "HASH") {
             records = eh.get_all();
