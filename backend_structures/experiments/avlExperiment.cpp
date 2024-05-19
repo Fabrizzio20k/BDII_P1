@@ -46,72 +46,105 @@ using namespace std::chrono;
 //	file.close();
 //}
 
-void fulfill(AVLFile<ll> &file, ll beg, ll dataSize) {
-	file.clear();
+void loadTestData(AVLFile<ll> &avlfile) {
+	string path = __FILE__;
+	path = path.substr(0, path.find_last_of("\\/"));
+	path = path.substr(0, path.find_last_of("\\/"));
+	path = path + "/experiments/test_100000.csv";
+	ifstream file(path);
 
-	for (ll i = beg; i < dataSize; i++) {
-		Record<ll> r;
-		r.id = i;
+	avlfile.clear();
 
-		file.insert(r);
+	if (!file.is_open()){
+		cerr << "No se pudo abrir el archivo" << endl;
+		exit(1);
 	}
+
+	Record<ll> record;
+
+	string line;
+	getline(file, line);
+
+	int i = 0;
+	while (file >> record && file.peek() != EOF){
+		avlfile.insert(record);
+		i++;
+	}
+
+	cout << "Total records read: " << i << endl;
+	file.close();
 }
 
-//void testSingleSearch(AVLFile<int> &avlfile, int key) {
-//	cout << "Busqueda de un registro" << endl;
+//void fulfill(AVLFile<ll> &file, ll beg, ll dataSize) {
+//	file.clear();
 //
-//	auto start = high_resolution_clock::now();
-//	auto records = avlfile.search(key);
-//	auto end = high_resolution_clock::now();
-//	auto time_span = duration_cast<microseconds>(end - start);
+//	for (ll i = beg; i < dataSize; i++) {
+//		Record<ll> r;
+//		r.id = i;
 //
-//	for (auto r : records)
-//		cout << r.cod << " " << r.nombre << " " << endl;
-//
-//	cout << "Tiempo de busqueda: " << time_span.count() << " ms" << endl;
-//	cout << "################################" << endl << endl;
+//		file.insert(r);
+//	}
 //}
-//
-//void testRangeSearch(AVLFile<int> &avlfile, int beginKey, int endKey) {
-//	cout << "Busqueda de un rango de registros" << endl;
-//
-//	auto start = high_resolution_clock::now();
-//	auto records = avlfile.rangeSearch(beginKey, endKey);
-//	auto end = high_resolution_clock::now();
-//	auto time_span = duration_cast<microseconds>(end - start);
-//
-//	for (auto r : records)
-//		cout << r.cod << " " << r.nombre << " " << endl;
-//
-//	cout << "Tiempo de busqueda por rango: " << time_span.count() << " ms" << endl;
-//	cout << "################################" << endl << endl;
-//}
-//
-//void testInsert(AVLFile<int> &avlfile, int key) {
-//	cout << "Insercion de un registro" << endl;
-//
-//	Record<int> r = {key, "Name", 1};
-//
-//	auto start = high_resolution_clock::now();
-//	avlfile.insert(r);
-//	auto end = high_resolution_clock::now();
-//	auto time_span = duration_cast<microseconds>(end - start);
-//
-//	cout << "Tiempo de insercion: " << time_span.count() << " ms" << endl;
-//	cout << "################################" << endl << endl;
-//}
-//
-//void testDelete(AVLFile<int> &avlfile, int key) {
-//	cout << "Eliminacion de un registro" << endl;
-//
-//	auto start = high_resolution_clock::now();
-//	cout << avlfile.remove(key);
-//	auto end = high_resolution_clock::now();
-//	auto time_span = duration_cast<microseconds>(end - start);
-//
-//	cout << "Tiempo de eliminacion: " << time_span.count() << " ms" << endl;
-//	cout << "################################" << endl << endl;
-//}
+
+void testSingleSearch(AVLFile<ll> &avlfile, ll key) {
+	cout << "Busqueda de un registro" << endl;
+
+	auto start = high_resolution_clock::now();
+	auto records = avlfile.search(key);
+	auto end = high_resolution_clock::now();
+	auto time_span = duration_cast<microseconds>(end - start);
+
+	cout << "Registro encontrado: ";
+	for (auto r : records)
+		cout << r.id << endl;
+
+	cout << "Tiempo de busqueda: " << time_span.count() << " ms" << endl;
+	cout << "Accesos a memoria: " << accessToSecondaryMemory << endl;
+	cout << "\n################################" << endl << endl;
+}
+
+void testRangeSearch(AVLFile<ll> &avlfile, ll beginKey, ll endKey) {
+	cout << "Busqueda de un rango de registros" << endl;
+
+	auto start = high_resolution_clock::now();
+	auto records = avlfile.rangeSearch(beginKey, endKey);
+	auto end = high_resolution_clock::now();
+	auto time_span = duration_cast<microseconds>(end - start);
+
+	cout << "Registros encontrados: " << records.size() << endl;
+
+	cout << "Tiempo de busqueda por rango: " << time_span.count() << " ms" << endl;
+	cout << "Accesos a memoria: " << accessToSecondaryMemory << endl;
+	cout << "\n################################" << endl << endl;
+}
+
+void testInsert(AVLFile<ll> &avlfile, ll key) {
+	cout << "Insercion de un registro" << endl;
+
+	Record<ll> r ={ key, "YAPE FAKE APK", 1000000, "USD", 0.0, 0, 0, 0.0, 0.0, "1.0", "4+", "Finance", 38, 5, 1, 1, -1, -1, 0};
+
+	auto start = high_resolution_clock::now();
+	avlfile.insert(r);
+	auto end = high_resolution_clock::now();
+	auto time_span = duration_cast<microseconds>(end - start);
+
+	cout << "Tiempo de insercion: " << time_span.count() << " ms" << endl;
+	cout << "Accesos a memoria: " << accessToSecondaryMemory << endl;
+	cout << "\n################################" << endl << endl;
+}
+
+void testDelete(AVLFile<ll> &avlfile, ll key) {
+	cout << "Eliminacion de un registro" << endl;
+
+	auto start = high_resolution_clock::now();
+	cout << avlfile.remove(key);
+	auto end = high_resolution_clock::now();
+	auto time_span = duration_cast<microseconds>(end - start);
+
+	cout << "Tiempo de eliminacion: " << time_span.count() << " ms" << endl;
+	cout << "Accesos a memoria: " << accessToSecondaryMemory << endl;
+	cout << "################################" << endl << endl;
+}
 
 //int main(){
 //	AVLFile<ll> avlfile("data.dat");
@@ -137,7 +170,36 @@ void fulfill(AVLFile<ll> &file, ll beg, ll dataSize) {
 //	return 0;
 //}
 
+ll randomNumber(){
+	int min = 200000000;
+	int max = 900000000;
+
+	random_device rd;
+	mt19937 gen(rd());
+
+	uniform_int_distribution<> distrib(min, max);
+
+	return distrib(gen);
+}
+
 int main(){
+	AVLFile<ll> avlfile("data.dat");
+
+//	loadTestData(avlfile);
+
+	avlfile.printAll();
+
+	ll testId = 221700358; // Leaf id
+	ll beginKey = randomNumber();
+	ll endKey = beginKey + 100000000;
+
+	testSingleSearch(avlfile, testId);
+
+	testRangeSearch(avlfile, beginKey, endKey);
+
+	testInsert(avlfile, testId + 1);
+
+	testDelete(avlfile, testId + 1);
 
 	return 0;
 }

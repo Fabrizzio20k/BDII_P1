@@ -10,34 +10,6 @@
 
 using namespace std;
 
-//
-// template<typename TK>
-// struct Record {
-//	TK id;
-//	char nombre[12];
-//	int ciclo;
-//	long left = -1, right = -1;
-//	int height = 0;
-//
-//	void setData() {
-//		cout << "Codigo:";
-//		cin >> id;
-//		cout << "Nombre: ";
-//		cin >> nombre;
-//		cout << "Ciclo: ";
-//		cin >> ciclo;
-//	}
-//
-//	void showData() {
-//		cout << "\nCodigo: " << id;
-//		cout << "\nNombre: " << nombre;
-//		cout << "\nCiclo : " << ciclo << endl;
-//		cout << "Izq : " << left << endl;
-//		cout << "Der : " << right << endl;
-//		cout << "Altura : " << height << endl;
-//	}
-//};
-
 template <typename TK>
 class AVLFile
 {
