@@ -19,10 +19,8 @@
     - [Ejemplos de Secuencias SQL](#ejemplos-de-secuencias-sql)
     - [Justificación de uso](#justificación-de-uso)
   - [Análisis comparativo](#análisis-comparativo)
-    - [Inserción](#inserción)
-    - [Búsqueda](#búsqueda)
-    - [Eliminación](#eliminación)
-    - [Resultados experimentales](#resultados-experimentales)
+    - [Métricas del AVL](#metricas-de-avlfile)
+      - [Resultados experimentales](#resultados-experimentales-avfile)
   - [Pruebas de uso y presentación](#pruebas-de-uso-y-presentación)
     - [Interfaz gráfica](#interfaz-gráfica)
     - [Demostración de funcionalidades](#demostración-de-funcionalidades)
@@ -173,12 +171,14 @@ Para el análisis comparativo se utilizaron datos falsos generados con la estruc
 
 [//]: # (Gráficas, considerar dos métricas: total de accesos a disco duro {read & write} y tiempo de ejecución en milisegundos) 
 
-### AVL File
-|**Búsqueda única**|            **Búsqueda por Rango**            |                 **Inserción**                  |                **Eliminación**                 |
-|:------------:|:--------------------------------------------:|:----------------------------------------------:|:----------------------------------------------:|
-|![AVLUniqueSearch](assets/AVLUniqueSearch.png)| ![AVLRangeSearch](assets/AVLRangeSearch.png)| ![AVLInsertRecord](assets/AVLInsertRecord.png) | ![AVLDeleteRecord](assets/AVLDeleteRecord.png) |
+### Métricas de AVLFile
+|               **Búsqueda única**               |            **Búsqueda por Rango**        |
+|:----------------------------------------------:|:--------------------------------------------:|
+| ![AVLUniqueSearch](assets/AVLUniqueSearch.png) | ![AVLRangeSearch](assets/AVLRangeSearch.png)|
+|                 **Inserción**                  |                **Eliminación**                 |
+| ![AVLInsertRecord](assets/AVLInsertRecord.png) | ![AVLDeleteRecord](assets/AVLDeleteRecord.png) |
 
-#### Resultados experimentales
+#### Resultados experimentales AVLFile
 
 
 [//]: # (Discusión de los resultados experimentales )
