@@ -152,7 +152,7 @@ class SequentialFile {
 
         Block block = getFirstBlock();
         auto recordCmp = [&](Record& r1, Record& r2)->bool {
-            return cmp(getKey(r1.data), getKey(r2.data)) == 0;
+            return cmp(getKey(r1.data), getKey(r2.data)) == -1;
         };
 
         int pos {1};
@@ -344,7 +344,7 @@ public:
         else return false;
     }
 
-    vector<T> range(Key left, Key right) {
+    vector<T> rangeSearch(Key left, Key right) {
         auto [record, pos] = _search(left);
 
         if (pos == 0 || cmp(getKey(record.data), left) < 0) {
