@@ -374,6 +374,7 @@ class BPlusTree {
 
            x.n -= 1;
            leftChild.n += child.n;
+           leftChild.next = child.next;
 
             setNode(x, pos);
             setLeaf(leftChild, x.c[i - 1]);
@@ -496,6 +497,17 @@ class BPlusTree {
         }
     }
 
+    int _lowerBound(Node& x, Key key) {
+        int i {};
+        for (; i < x.n; ++i)
+            if (x.k[i] > key) break;
+        if (x.leaf) return x.c[i];
+        else {
+            Node y = getNode(x.c[i]);
+            return _lowerBound(y, key);
+        }
+    }
+
 
 public:
     BPlusTree(const char* filename, function<Key(Record&)> getKey, function<int(Key,Key)> cmp) : getKey(getKey), cmp(cmp) {
@@ -565,7 +577,23 @@ public:
     }
 
     vector<Record> range(Key left, Key right) {
+        Node r = getNode(root);
+        int pos = _lowerBound(r, left);
+        Leaf x = getLeaf(pos);
 
+        int i = 0;
+        for (; i < x.n; ++i)
+            if (x.records[i] >= left) break;
+
+        vector<Record> result;
+        while (pos) {
+            for (; i < x.n; ++i)
+                if (x.records[i] > right) return result;
+                else result.push_back(x.records[i]);
+            pos = x.next;
+            x = getLeaf(pos);
+        }
+        return result;
     }
 };
 
