@@ -11,10 +11,21 @@
     - [Resultados esperados con indexación](#resultados-esperados-con-indexación)
   - [Técnicas utilizadas](#técnicas-utilizadas)
     - [Técnicas de indexación de archivos utilizadas](#técnicas-de-indexación-de-archivos-utilizadas)
+      - [AVL File](#avl-file)
+      - [B+ Tree File](#b-tree-file)
+      - [Extendible Hash File](#extendible-hash-file)
   - [Implementación del Parser SQL](#implementación-del-parser-sql)
-    - [¿Por qué usar Expresiones Regulares?](#¿por-qué-usar-expresiones-regulares?)
+    - [¿Por qué usar Expresiones Regulares?](#por-qué-usar-expresiones-regulares)
     - [Ejemplos de Secuencias SQL](#ejemplos-de-secuencias-sql)
     - [Justificación de uso](#justificación-de-uso)
+  - [Análisis comparativo](#análisis-comparativo)
+    - [Inserción](#inserción)
+    - [Búsqueda](#búsqueda)
+    - [Eliminación](#eliminación)
+    - [Resultados experimentales](#resultados-experimentales)
+  - [Pruebas de uso y presentación](#pruebas-de-uso-y-presentación)
+    - [Interfaz gráfica](#interfaz-gráfica)
+    - [Demostración de funcionalidades](#demostración-de-funcionalidades)
   - [Autores](#autores)
   - [Referencias](#referencias)
 
@@ -190,4 +201,4 @@ El uso de expresiones regulares en la implementación de un parser SQL es una pr
 
 ## Referencias
 
-- Nievergelt, Y. (2015). Logic, mathematics, and computer science: modern foundations with practical applications. Springer.
+- Nievergelt, Y. (2015). Logic, mathematics, and computer science: modern foundations with practical applications. Springer .
